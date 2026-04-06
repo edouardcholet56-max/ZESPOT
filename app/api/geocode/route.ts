@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Address required' }, { status: 400 });
   }
 
-  const key = process.env.AIzaSyCHPrLELLsD1qQ3s7kXX0c7ThDJo6sgZ-Y;
+  const key = process.env.GOOGLE_MAPS_API_KEY;
   if (!key) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
   }
