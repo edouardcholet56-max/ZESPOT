@@ -37,7 +37,14 @@ export default function OnboardingPage() {
           setGeoLoading(false);
         }
       },
-      () => { setGeoGranted(false); setGeoLoading(false); }
+      (err) => {
+        setGeoGranted(false);
+        setGeoLoading(false);
+        if (err.code === 1) {
+          // PERMISSION_DENIED — store message for UI
+          sessionStorage.setItem('geoError', 'permission');
+        }
+      }
     );
   };
 
@@ -120,7 +127,7 @@ export default function OnboardingPage() {
                 {geoGranted === true
                   ? geoLoading ? 'Récupération de l\'adresse…' : geoAddress || 'Position obtenue'
                   : geoGranted === false
-                  ? 'Refusé — saisie manuelle'
+                  ? 'Bloqué — autorise la localisation dans les réglages du navigateur'
                   : 'Pour pré-remplir ton adresse'}
               </p>
             </div>
