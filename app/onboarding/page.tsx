@@ -421,7 +421,7 @@ export default function OnboardingPage() {
     if (allow && 'Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
     }
-    router.push('/find');
+    router.push('/soiree');
   };
 
   if (step === 'tracking') return <TrackingScreen onChoice={handleTracking} />;
