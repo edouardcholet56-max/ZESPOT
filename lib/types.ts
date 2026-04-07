@@ -17,6 +17,7 @@ export interface Place {
   price_level?: number;
   open_now?: boolean;
   dist: number;
+  photo_reference?: string;
   travelTimes?: (number | null)[]; // seconds per participant, null if unavailable
 }
 

@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       user_ratings_total: p.user_ratings_total ?? null,
       price_level: p.price_level ?? null,
       open_now: p.opening_hours?.open_now ?? null,
+      photo_reference: p.photos?.[0]?.photo_reference ?? null,
     }));
 
     return NextResponse.json({ places });
