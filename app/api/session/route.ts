@@ -1,5 +1,5 @@
-import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
+import { redis } from '@/lib/redis';
 import { Session, TransportMode } from '@/lib/types';
 
 function genId(): string {
@@ -19,11 +19,11 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    await kv.set(`session:${id}`, session, { ex: 86400 }); // 24h TTL
+    await redis.set(`session:${id}`, session);
     return NextResponse.json({ id });
   } catch {
     return NextResponse.json(
-      { error: 'Storage unavailable. Configure Vercel KV.' },
+      { error: 'Storage non configuré. Ajoute UPSTASH_REDIS_REST_URL et UPSTASH_REDIS_REST_TOKEN dans Vercel.' },
       { status: 503 }
     );
   }
@@ -31,13 +31,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 });
 
   try {
-    const session = await kv.get<Session>(`session:${id}`);
+    const session = await redis.get<Session>(`session:${id}`);
     if (!session) return NextResponse.json({ error: 'Session introuvable' }, { status: 404 });
     return NextResponse.json(session);
   } catch {
-    return NextResponse.json({ error: 'Storage unavailable' }, { status: 503 });
+    return NextResponse.json({ error: 'Storage non configuré' }, { status: 503 });
   }
 }

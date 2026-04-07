@@ -1,8 +1,7 @@
-import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
+import { redis } from '@/lib/redis';
 import { Session } from '@/lib/types';
 
-// POST /api/session/[id] — add a participant
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -12,11 +11,11 @@ export async function POST(
   const { name, address } = body as { name: string; address: string };
 
   if (!name?.trim() || !address?.trim()) {
-    return NextResponse.json({ error: 'name and address required' }, { status: 400 });
+    return NextResponse.json({ error: 'name et address requis' }, { status: 400 });
   }
 
   try {
-    const session = await kv.get<Session>(`session:${id}`);
+    const session = await redis.get<Session>(`session:${id}`);
     if (!session) return NextResponse.json({ error: 'Session introuvable' }, { status: 404 });
 
     const alreadyIn = session.participants.some(
@@ -24,11 +23,11 @@ export async function POST(
     );
     if (!alreadyIn) {
       session.participants.push({ name: name.trim(), address: address.trim() });
-      await kv.set(`session:${id}`, session, { ex: 86400 });
+      await redis.set(`session:${id}`, session);
     }
 
     return NextResponse.json(session);
   } catch {
-    return NextResponse.json({ error: 'Storage unavailable' }, { status: 503 });
+    return NextResponse.json({ error: 'Storage non configuré' }, { status: 503 });
   }
 }
