@@ -32,7 +32,7 @@ export default function SoireePage() {
 
   const handleCreate = async () => {
     if (!eventName.trim() || !date || !creatorName.trim()) {
-      setError('Remplis le nom de l'événement, la date et ton prénom.');
+      setError("Remplis le nom de l'événement, la date et ton prénom.");
       return;
     }
     setError('');
@@ -64,7 +64,7 @@ export default function SoireePage() {
 
   const handleJoin = async () => {
     const trimmed = code.trim().toUpperCase();
-    if (!trimmed) { setError('Entre le code de l'événement.'); return; }
+    if (!trimmed) { setError("Entre le code de l'événement."); return; }
     setError('');
     setJoining(true);
     try {
@@ -208,7 +208,7 @@ export default function SoireePage() {
               disabled={creating}
               className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] mt-2 transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] disabled:opacity-50 disabled:translate-y-0"
             >
-              {creating ? 'Création...' : 'Créer l'événement →'}
+              {creating ? 'Création...' : "Créer l'événement →"}
             </button>
           </div>
         )}
@@ -232,7 +232,7 @@ export default function SoireePage() {
               disabled={joining}
               className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] disabled:opacity-50"
             >
-              {joining ? 'Recherche...' : 'Accéder à l'événement →'}
+              {joining ? 'Recherche...' : "Accéder à l'événement →"}
             </button>
           </div>
         )}
