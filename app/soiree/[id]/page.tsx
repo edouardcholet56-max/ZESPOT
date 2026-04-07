@@ -206,8 +206,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-4 px-5">
         <div className="text-[48px]">😕</div>
-        <p className="text-white text-[18px] font-semibold">Soirée introuvable</p>
-        <p className="text-[#555] text-[13px]">Ce code ne correspond à aucune soirée active.</p>
+        <p className="text-white text-[18px] font-semibold">Événement introuvable</p>
+        <p className="text-[#555] text-[13px]">Ce code ne correspond à aucun événement active.</p>
         <button onClick={() => router.push('/soiree')} className="mt-4 px-6 py-3 bg-[#FF6B2C] text-white rounded-[12px] text-[14px] font-semibold">
           Retour
         </button>
@@ -228,7 +228,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button onClick={() => router.push('/soiree')} className="text-[#555] text-[13px] hover:text-[#FF6B2C] transition-colors">
-            ← Soirées
+            ← Événements
           </button>
           <div className="text-[16px] font-bold tracking-[-0.5px]">
             ZESP<span className="text-[#FF6B2C]">0</span>T
@@ -311,7 +311,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           {/* Join form */}
           {showJoin && (
             <div className="mt-4 pt-4 border-t border-[#1E1E1E] flex flex-col gap-3">
-              <p className="text-[12px] text-[#666]">Rejoins la soirée !</p>
+              <p className="text-[12px] text-[#666]">Rejoins l'événement !</p>
               {joinError && <p className="text-[12px] text-[#ff6b6b]">{joinError}</p>}
               <input
                 value={joinName}

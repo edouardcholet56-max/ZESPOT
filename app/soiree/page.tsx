@@ -32,7 +32,7 @@ export default function SoireePage() {
 
   const handleCreate = async () => {
     if (!eventName.trim() || !date || !creatorName.trim()) {
-      setError('Remplis le nom de la soirée, la date et ton prénom.');
+      setError('Remplis le nom de l'événement, la date et ton prénom.');
       return;
     }
     setError('');
@@ -64,7 +64,7 @@ export default function SoireePage() {
 
   const handleJoin = async () => {
     const trimmed = code.trim().toUpperCase();
-    if (!trimmed) { setError('Entre le code de la soirée.'); return; }
+    if (!trimmed) { setError('Entre le code de l'événement.'); return; }
     setError('');
     setJoining(true);
     try {
@@ -107,7 +107,7 @@ export default function SoireePage() {
                   : 'text-[#666] hover:text-white'
               }`}
             >
-              {t === 'create' ? '✨ Créer une soirée' : '🔗 Rejoindre'}
+              {t === 'create' ? '✨ Créer un événement' : '🔗 Rejoindre'}
             </button>
           ))}
         </div>
@@ -123,11 +123,11 @@ export default function SoireePage() {
         {tab === 'create' && (
           <div className="flex flex-col gap-4">
             <div>
-              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Nom de la soirée *</label>
+              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Nom de l'événement *</label>
               <input
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                placeholder="Soirée 30 ans de Paul, After work..."
+                placeholder="Événement 30 ans de Paul, After work..."
                 className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[14px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
               />
             </div>
@@ -208,7 +208,7 @@ export default function SoireePage() {
               disabled={creating}
               className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] mt-2 transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] disabled:opacity-50 disabled:translate-y-0"
             >
-              {creating ? 'Création...' : 'Créer la soirée →'}
+              {creating ? 'Création...' : 'Créer l'événement →'}
             </button>
           </div>
         )}
@@ -217,7 +217,7 @@ export default function SoireePage() {
         {tab === 'join' && (
           <div className="flex flex-col gap-4">
             <div>
-              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Code de la soirée</label>
+              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Code de l'événement</label>
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -232,7 +232,7 @@ export default function SoireePage() {
               disabled={joining}
               className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] disabled:opacity-50"
             >
-              {joining ? 'Recherche...' : 'Accéder à la soirée →'}
+              {joining ? 'Recherche...' : 'Accéder à l'événement →'}
             </button>
           </div>
         )}
