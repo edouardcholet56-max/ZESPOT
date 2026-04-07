@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Place, TransportMode } from '@/lib/types';
 import { formatDist } from '@/lib/utils';
 
@@ -23,6 +24,7 @@ function formatTime(seconds: number | null | undefined): string {
 }
 
 export default function SpotCard({ place, rank, mode, onClick }: Props) {
+  const [imgError, setImgError] = useState(false);
   const isTop = rank === 1;
 
   const tags: string[] = [];
@@ -39,8 +41,8 @@ export default function SpotCard({ place, rank, mode, onClick }: Props) {
     ? Math.max(...place.travelTimes!.filter((t): t is number => t !== null))
     : null;
 
-  const photoSrc = place.photo_reference
-    ? `/api/photo?ref=${place.photo_reference}&w=400`
+  const photoSrc = place.photo_reference && !imgError
+    ? `/api/photo?ref=${encodeURIComponent(place.photo_reference)}&w=400`
     : null;
 
   return (
@@ -60,11 +62,12 @@ export default function SpotCard({ place, rank, mode, onClick }: Props) {
             src={photoSrc}
             alt={place.name}
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="eager"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[#1C1C1C] to-[#0F0F0F] flex items-center justify-center">
-            <span className="text-[36px] opacity-20">🍺</span>
+            <span className="text-[36px] opacity-40">🍺</span>
           </div>
         )}
 

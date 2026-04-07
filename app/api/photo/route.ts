@@ -10,20 +10,25 @@ export async function GET(request: NextRequest) {
   if (!key) return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
 
   try {
+    // Try old Places API v1 photo endpoint first
     const googleUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${w}&photo_reference=${ref}&key=${key}`;
     const res = await fetch(googleUrl, { redirect: 'follow' });
 
-    if (!res.ok) return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
+    if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      // Make sure we got an image, not a JSON error
+      if (contentType.startsWith('image/')) {
+        const buffer = await res.arrayBuffer();
+        return new NextResponse(buffer, {
+          headers: {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=86400',
+          },
+        });
+      }
+    }
 
-    const buffer = await res.arrayBuffer();
-    const contentType = res.headers.get('content-type') || 'image/jpeg';
-
-    return new NextResponse(buffer, {
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=86400', // cache 24h
-      },
-    });
+    return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
   } catch {
     return NextResponse.json({ error: 'Photo fetch failed' }, { status: 500 });
   }
