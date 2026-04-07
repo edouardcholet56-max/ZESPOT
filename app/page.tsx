@@ -1,105 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import HomeScreen from '@/components/HomeScreen';
-import LoadingScreen from '@/components/LoadingScreen';
-import ResultsScreen from '@/components/ResultsScreen';
-import { AddressItem, Place, LatLng } from '@/lib/types';
-import { getMidpoint, haversine, uid, sleep } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
-type Screen = 'home' | 'loading' | 'results';
-
-export default function Page() {
-  const [screen, setScreen] = useState<Screen>('home');
-  const [addresses, setAddresses] = useState<AddressItem[]>([
-    { id: uid(), value: '' },
-    { id: uid(), value: '' },
-    { id: uid(), value: '' },
-  ]);
-  const [loadingStep, setLoadingStep] = useState(0);
-  const [coords, setCoords] = useState<(LatLng & { formatted: string })[]>([]);
-  const [midpoint, setMidpoint] = useState<LatLng | null>(null);
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [error, setError] = useState('');
-
-  const findSpot = async () => {
-    const filled = addresses.filter((a) => a.value.trim().length > 0);
-    if (filled.length < 2) {
-      setError('Entre au moins 2 adresses !');
-      return;
-    }
-    setError('');
-    setScreen('loading');
-    setLoadingStep(1);
-
-    try {
-      // ── Step 1: Geocode all addresses ──
-      const geocoded: (LatLng & { formatted: string })[] = [];
-      for (const addr of filled) {
-        const res = await fetch(`/api/geocode?address=${encodeURIComponent(addr.value)}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Geocoding failed');
-        geocoded.push(data);
-      }
-      setCoords(geocoded);
-
-      // ── Step 2: Calculate midpoint ──
-      setLoadingStep(2);
-      await sleep(400);
-      const mid = getMidpoint(geocoded);
-      setMidpoint(mid);
-
-      // ── Step 3: Find nearby bars ──
-      setLoadingStep(3);
-      let res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=800`);
-      let data = await res.json();
-      let rawPlaces = data.places || [];
-
-      // Expand radius if too few results
-      if (rawPlaces.length < 3) {
-        res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=1500`);
-        data = await res.json();
-        rawPlaces = data.places || [];
-      }
-
-      // Enrich with distance from midpoint, sort, cap
-      const sorted: Place[] = rawPlaces
-        .map((p: Omit<Place, 'dist'>) => ({
-          ...p,
-          dist: haversine(mid.lat, mid.lng, p.lat, p.lng),
-        }))
-        .sort((a: Place, b: Place) => a.dist - b.dist)
-        .slice(0, 15);
-
-      setPlaces(sorted);
-      await sleep(500);
-      setScreen('results');
-    } catch (err: unknown) {
-      setScreen('home');
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
-    }
-  };
+export default function HomePage() {
+  const router = useRouter();
 
   return (
-    <>
-      {screen === 'home' && (
-        <HomeScreen
-          addresses={addresses}
-          setAddresses={setAddresses}
-          onFind={findSpot}
-          error={error}
-          setError={setError}
-        />
-      )}
-      {screen === 'loading' && <LoadingScreen step={loadingStep} />}
-      {screen === 'results' && midpoint && (
-        <ResultsScreen
-          coords={coords}
-          midpoint={midpoint}
-          places={places}
-          onBack={() => setScreen('home')}
-        />
-      )}
-    </>
+    <div
+      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5"
+      style={{
+        backgroundImage:
+          'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)',
+      }}
+    >
+      <div className="text-center">
+        <h1 className="text-[72px] font-bold tracking-[-4px] leading-none">
+          ZESP<span className="text-[#FF6B2C]">0</span>T
+        </h1>
+        <p className="text-[13px] tracking-[5px] uppercase text-[#555] mt-3 mb-16">
+          Find the perfect spot
+        </p>
+        <button
+          onClick={() => router.push('/onboarding')}
+          className="px-10 py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] tracking-[0.3px] transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] active:translate-y-0"
+        >
+          Commencer →
+        </button>
+      </div>
+    </div>
   );
 }
