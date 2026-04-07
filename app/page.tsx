@@ -1,13 +1,18 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5"
-      style={{ backgroundImage: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)' }}>
+    <div
+      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5"
+      style={{
+        backgroundImage:
+          'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)',
+      }}
+    >
       <div className="text-center">
         <h1 className="text-[72px] font-bold tracking-[-4px] leading-none">
           ZESP<span className="text-[#FF6B2C]">0</span>T
@@ -23,5 +28,5 @@ export default function HomePage() {
         </button>
       </div>
     </div>
-  )
+  );
 }
