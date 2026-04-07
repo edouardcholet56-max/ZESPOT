@@ -119,7 +119,7 @@ export default function HomeScreen({
 
   return (
     <div
-      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5 py-12"
+      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5 py-10 pb-28"
       style={{
         backgroundImage:
           'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)',
