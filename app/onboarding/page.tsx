@@ -8,6 +8,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [geoGranted, setGeoGranted] = useState<boolean | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [contactsGranted, setContactsGranted] = useState<boolean | null>(null);
   const [geoAddress, setGeoAddress] = useState('');
 
@@ -16,6 +17,7 @@ export default function OnboardingPage() {
       setGeoGranted(false);
       return;
     }
+    setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         setGeoGranted(true);
@@ -24,12 +26,18 @@ export default function OnboardingPage() {
             `/api/reverse-geocode?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`
           );
           const data = await res.json();
-          if (data.address) setGeoAddress(data.address);
+          if (data.address) {
+            setGeoAddress(data.address);
+            // Save immediately — don't wait for the continue button
+            sessionStorage.setItem('myAddress', data.address);
+          }
         } catch {
           // silently fail — address pre-fill is optional
+        } finally {
+          setGeoLoading(false);
         }
       },
-      () => setGeoGranted(false)
+      () => { setGeoGranted(false); setGeoLoading(false); }
     );
   };
 
@@ -110,7 +118,7 @@ export default function OnboardingPage() {
               <p className="text-white text-[13px] font-medium">Géolocalisation</p>
               <p className="text-[#555] text-[11px] mt-0.5 truncate">
                 {geoGranted === true
-                  ? geoAddress || 'Position obtenue'
+                  ? geoLoading ? 'Récupération de l\'adresse…' : geoAddress || 'Position obtenue'
                   : geoGranted === false
                   ? 'Refusé — saisie manuelle'
                   : 'Pour pré-remplir ton adresse'}
@@ -124,8 +132,11 @@ export default function OnboardingPage() {
                 Autoriser
               </button>
             )}
-            {geoGranted === true && (
+            {geoGranted === true && !geoLoading && (
               <span className="text-[#FF6B2C] text-[18px] flex-shrink-0">✓</span>
+            )}
+            {geoLoading && (
+              <div className="w-4 h-4 border-2 border-[#2A2A2A] border-t-[#FF6B2C] rounded-full animate-spin flex-shrink-0" />
             )}
             {geoGranted === false && (
               <span className="text-[#555] text-[13px] flex-shrink-0">✕</span>
