@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-type Step = 'tracking' | 'splash' | 'launch' | 'auth' | 'location' | 'notifications';
+type Step = 'tracking' | 'splash' | 'launch' | 'auth' | 'location';
 
 // ── Icons ──────────────────────────────────────────────────────────
 
@@ -34,29 +34,31 @@ function AppleIcon() {
   );
 }
 
-// ── Step 1: Tracking consent (ATT style) ─────────────────────────
+// ── Step 1: ATT tracking consent ──────────────────────────────────
 
 function TrackingScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
+  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6"
-      style={{ backgroundImage: 'radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,107,44,0.05) 0%, transparent 70%)' }}>
+    <div
+      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6"
+      style={{ backgroundImage: 'radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,107,44,0.06) 0%, transparent 70%)' }}
+    >
       <div
         className="w-full max-w-[340px] bg-[#1C1C1E] rounded-[24px] p-6 shadow-2xl"
         style={{
           opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.96)',
-          transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)',
+          transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.95)',
+          transition: 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1)',
         }}
       >
         <div className="relative w-16 h-16 mb-5">
           <div className="w-14 h-14 bg-[#FF6B2C] rounded-[16px] flex items-center justify-center text-[28px] shadow-[0_4px_20px_rgba(255,107,44,0.4)]">
-            📍
+            🍺
           </div>
           <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0A84FF] rounded-full flex items-center justify-center border-2 border-[#1C1C1E]">
-            <span className="text-[14px]">✋</span>
+            <span className="text-[13px]">✋</span>
           </div>
         </div>
 
@@ -89,55 +91,92 @@ function TrackingScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
 // ── Step 2: Splash (logo motion) ──────────────────────────────────
 
 function SplashScreen() {
-  const [phase, setPhase] = useState<'hidden' | 'visible' | 'fading'>('hidden');
+  const [phase, setPhase] = useState<'hidden' | 'in' | 'hold' | 'out'>('hidden');
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('visible'), 100);
-    const t2 = setTimeout(() => setPhase('fading'), 2200);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t1 = setTimeout(() => setPhase('in'), 80);
+    const t2 = setTimeout(() => setPhase('hold'), 700);
+    const t3 = setTimeout(() => setPhase('out'), 2200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   return (
     <div
       className="min-h-screen bg-[#0A0A0A] flex items-center justify-center"
       style={{
-        opacity: phase === 'fading' ? 0 : 1,
-        transition: phase === 'fading' ? 'opacity 0.5s ease' : 'none',
+        opacity: phase === 'out' ? 0 : 1,
+        transition: phase === 'out' ? 'opacity 0.5s ease' : 'none',
       }}
     >
-      <div
-        style={{
-          opacity: phase === 'hidden' ? 0 : 1,
-          transform: phase === 'hidden' ? 'scale(0.7)' : 'scale(1)',
-          transition: 'opacity 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}
-      >
-        <h1 className="text-[72px] font-bold tracking-[-5px] leading-none select-none">
-          ZESP<span className="text-[#FF6B2C]">0</span>T
-        </h1>
+      <div className="flex flex-col items-center gap-4">
+        <div
+          style={{
+            opacity: phase === 'hidden' ? 0 : 1,
+            transform: phase === 'hidden' ? 'scale(0.6) translateY(20px)' : 'scale(1) translateY(0)',
+            transition: 'opacity 0.55s ease, transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        >
+          <h1 className="text-[80px] font-bold tracking-[-6px] leading-none select-none">
+            ZESP<span className="text-[#FF6B2C]">0</span>T
+          </h1>
+        </div>
+        <div
+          style={{
+            opacity: phase === 'hidden' || phase === 'in' ? 0 : 1,
+            transform: phase === 'hidden' || phase === 'in' ? 'translateY(8px)' : 'translateY(0)',
+            transition: 'opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s',
+          }}
+        >
+          <p className="text-[11px] tracking-[5px] uppercase text-[#444]">L&apos;organisateur de soirées</p>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Step 3: Launch screen ─────────────────────────────────────────
+// ── Step 3: Launch screen with rotating slogans ───────────────────
+
+const SLOGANS = [
+  'Trouvez le spot parfait pour tout le groupe.',
+  'Plus de galère pour choisir où se voir.',
+  'Le bar idéal, au point de rencontre idéal.',
+  'Chaque soirée commence ici.',
+  'Réunissez vos amis autour d\'un verre.',
+];
 
 function LaunchScreen({ onContinue }: { onContinue: () => void }) {
+  const [sloganIdx, setSloganIdx] = useState(0);
+  const [sloganVisible, setSloganVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSloganVisible(false);
+      setTimeout(() => {
+        setSloganIdx((i) => (i + 1) % SLOGANS.length);
+        setSloganVisible(true);
+      }, 350);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
       className="min-h-screen bg-[#0A0A0A] flex flex-col overflow-hidden"
-      style={{ backgroundImage: 'radial-gradient(ellipse 100% 55% at 50% 15%, rgba(255,107,44,0.13) 0%, transparent 65%)' }}
+      style={{ backgroundImage: 'radial-gradient(ellipse 100% 55% at 50% 15%, rgba(255,107,44,0.12) 0%, transparent 65%)' }}
     >
+      {/* Illustration */}
       <div className="flex-1 flex items-center justify-center px-6 pt-10">
         <div className="relative w-[280px] h-[280px]">
+          {/* Central icon */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88px] h-[88px] bg-[#FF6B2C] rounded-[26px] flex items-center justify-center text-[44px] z-10 shadow-[0_0_60px_rgba(255,107,44,0.5)]">
             🍺
           </div>
+          {/* Friend avatars */}
           {[
-            { emoji: '😊', x: '8%', y: '18%' },
-            { emoji: '🙂', x: '72%', y: '10%' },
-            { emoji: '😄', x: '78%', y: '68%' },
-            { emoji: '😁', x: '5%', y: '72%' },
+            { emoji: '😊', x: '6%', y: '14%' },
+            { emoji: '🙂', x: '70%', y: '8%' },
+            { emoji: '😄', x: '76%', y: '66%' },
+            { emoji: '😁', x: '4%', y: '70%' },
           ].map((f, i) => (
             <div
               key={i}
@@ -147,28 +186,43 @@ function LaunchScreen({ onContinue }: { onContinue: () => void }) {
               {f.emoji}
             </div>
           ))}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 280 280" style={{ opacity: 0.2 }}>
-            {[[32, 65], [216, 48], [234, 218], [28, 230]].map(([x, y], i) => (
-              <line key={i} x1="140" y1="140" x2={x} y2={y} stroke="#FF6B2C" strokeWidth="1.5" strokeDasharray="5 5" />
+          {/* Dashed lines */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 280 280" style={{ opacity: 0.25 }}>
+            {[[30, 60], [210, 44], [228, 214], [26, 224]].map(([x, y], i) => (
+              <line key={i} x1="140" y1="140" x2={x} y2={y} stroke="#FF6B2C" strokeWidth="1.5" strokeDasharray="5 6" />
             ))}
           </svg>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130px] h-[130px] rounded-full border border-[rgba(255,107,44,0.15)]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full border border-[rgba(255,107,44,0.07)]" />
+          {/* Rings */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130px] h-[130px] rounded-full border border-[rgba(255,107,44,0.12)]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[210px] h-[210px] rounded-full border border-[rgba(255,107,44,0.06)]" />
         </div>
       </div>
 
+      {/* Text + CTA */}
       <div className="px-7 pb-14">
-        <h1 className="text-[34px] font-bold tracking-[-1.5px] leading-[1.15] mb-3 text-center">
-          Trouvez le spot parfait<br />pour vous retrouver
+        <h1 className="text-[36px] font-bold tracking-[-1.5px] leading-[1.12] mb-5 text-center">
+          Lancez-vous
         </h1>
-        <p className="text-[#666] text-[14px] text-center mb-8 leading-relaxed">
-          Entrez vos adresses, ZESPOT calcule le meilleur bar au point de rencontre idéal pour tout le groupe.
-        </p>
+
+        {/* Rotating slogan */}
+        <div className="h-[44px] flex items-center justify-center mb-8 overflow-hidden">
+          <p
+            className="text-[14px] text-[#666] text-center leading-relaxed px-4"
+            style={{
+              opacity: sloganVisible ? 1 : 0,
+              transform: sloganVisible ? 'translateY(0)' : 'translateY(6px)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}
+          >
+            {SLOGANS[sloganIdx]}
+          </p>
+        </div>
+
         <button
           onClick={onContinue}
           className="w-full py-4 bg-white text-[#0A0A0A] text-[16px] font-bold rounded-[16px] transition-all hover:bg-gray-100 active:scale-[0.98]"
         >
-          Lancez-vous
+          Créer mon compte →
         </button>
       </div>
     </div>
@@ -191,41 +245,42 @@ function AuthScreen({
       <div className="flex justify-end mb-10">
         <button
           onClick={onContinue}
-          className="px-4 py-1.5 bg-[#1A1A1A] rounded-full text-[13px] text-[#888] border border-[#2A2A2A] transition-colors hover:border-[#444]"
+          className="px-4 py-1.5 bg-[#1A1A1A] rounded-full text-[13px] text-[#666] border border-[#2A2A2A] transition-colors hover:border-[#444]"
         >
           Ignorer
         </button>
       </div>
 
       <div className="w-[52px] h-[52px] bg-[#FF6B2C] rounded-[14px] flex items-center justify-center text-[26px] mb-6 shadow-[0_4px_24px_rgba(255,107,44,0.35)]">
-        📍
+        🍺
       </div>
 
-      <h1 className="text-[30px] font-bold tracking-[-1.2px] leading-tight mb-8">
+      <h1 className="text-[30px] font-bold tracking-[-1.2px] leading-tight mb-2">
         Bienvenue sur<br />
         ZESP<span className="text-[#FF6B2C]">0</span>T
       </h1>
+      <p className="text-[14px] text-[#555] mb-8">Crée ton compte pour commencer.</p>
 
       <div className="flex flex-col gap-3 mb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ton prénom"
-          className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-4 text-[15px] text-white placeholder-[#555] focus:outline-none focus:border-[#FF6B2C] transition-colors"
+          className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-4 text-[15px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
         />
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-mail *"
-          className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-4 text-[15px] text-white placeholder-[#555] focus:outline-none focus:border-[#FF6B2C] transition-colors"
+          placeholder="E-mail"
+          className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-4 text-[15px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
         />
         <button
           onClick={isValid ? onContinue : undefined}
           className={`w-full py-4 rounded-[14px] text-[15px] font-semibold transition-all ${
             isValid
               ? 'bg-[#FF6B2C] text-white hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)]'
-              : 'bg-[#1C1C1C] text-[#444] cursor-not-allowed'
+              : 'bg-[#1C1C1C] text-[#333] cursor-not-allowed'
           }`}
         >
           Continuer
@@ -233,9 +288,9 @@ function AuthScreen({
       </div>
 
       <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px bg-[#222]" />
-        <span className="text-[13px] text-[#555]">ou</span>
-        <div className="flex-1 h-px bg-[#222]" />
+        <div className="flex-1 h-px bg-[#1E1E1E]" />
+        <span className="text-[12px] text-[#444]">ou</span>
+        <div className="flex-1 h-px bg-[#1E1E1E]" />
       </div>
 
       <div className="flex flex-col gap-3">
@@ -255,108 +310,53 @@ function AuthScreen({
         </button>
         <button
           onClick={onContinue}
-          className="w-full py-4 bg-[#1A1A1A] border border-[#3A3A3A] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:border-[#555] active:scale-[0.98]"
+          className="w-full py-4 bg-[#1A1A1A] border border-[#333] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:border-[#555] active:scale-[0.98]"
         >
           <AppleIcon />
           Continuer avec Apple
         </button>
       </div>
 
-      <p className="text-[11px] text-[#444] text-center mt-8 leading-relaxed">
+      <p className="text-[11px] text-[#333] text-center mt-8 leading-relaxed">
         En continuant, vous acceptez notre{' '}
-        <span className="text-[#666] underline cursor-pointer">Politique de confidentialité</span>
+        <span className="text-[#555] underline cursor-pointer">Politique de confidentialité</span>
       </p>
     </div>
   );
 }
 
-// ── Step 5: Location permission (iOS style) ───────────────────────
+// ── Step 5: Location permission ───────────────────────────────────
 
-function LocationScreen({ onChoice }: { onChoice: (choice: 'deny' | 'once' | 'always') => void }) {
+function LocationScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
+  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   return (
     <div
-      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-end px-5 pb-14"
+      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6"
       style={{ backgroundImage: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(10,132,255,0.06) 0%, transparent 60%)' }}
     >
-      <div className="mb-6 text-center">
-        <p className="text-[13px] text-[#555] uppercase tracking-[1.5px]">Localisation</p>
-      </div>
+      {/* Page label */}
+      <p className="text-[12px] text-[#444] uppercase tracking-[1.5px] mb-8">Autorisation</p>
 
+      {/* iOS-style popup */}
       <div
-        className="w-full max-w-[390px] bg-[#1C1C1E] rounded-[20px] overflow-hidden"
+        className="w-full max-w-[310px] bg-[#1C1C1E] rounded-[20px] overflow-hidden shadow-2xl"
         style={{
           opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(20px)',
+          transition: 'opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1)',
         }}
       >
-        <div className="px-6 pt-7 pb-5 text-center">
-          <div className="w-[60px] h-[60px] bg-[#FF6B2C] rounded-[16px] flex items-center justify-center text-[28px] mx-auto mb-4 shadow-[0_4px_20px_rgba(255,107,44,0.35)]">
+        <div className="px-5 pt-6 pb-5 text-center">
+          <div className="w-[52px] h-[52px] bg-[#FF6B2C] rounded-[14px] flex items-center justify-center text-[26px] mx-auto mb-4 shadow-[0_4px_16px_rgba(255,107,44,0.35)]">
             📍
           </div>
           <h2 className="text-white text-[17px] font-semibold mb-2 leading-snug">
-            « ZESPOT » souhaite accéder à votre position
+            Autoriser « ZESPOT » à utiliser votre position ?
           </h2>
           <p className="text-[#8E8E93] text-[13px] leading-relaxed">
-            Votre position est utilisée pour calculer le point central entre vous et vos amis et trouver les bars les plus proches.
-          </p>
-        </div>
-
-        <div className="h-px bg-[#3A3A3C]" />
-
-        {[
-          { label: 'Ne pas autoriser', color: 'text-[#FF453A]', choice: 'deny' as const, bold: false },
-          { label: 'Autoriser une fois', color: 'text-[#0A84FF]', choice: 'once' as const, bold: false },
-          { label: "Autoriser lors de l'utilisation", color: 'text-[#0A84FF]', choice: 'always' as const, bold: true },
-        ].map((btn, i) => (
-          <button
-            key={i}
-            onClick={() => onChoice(btn.choice)}
-            className={`w-full py-4 ${btn.color} ${btn.bold ? 'font-semibold' : 'font-normal'} text-[17px] text-center transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C] ${i < 2 ? 'border-b border-[#3A3A3C]' : ''}`}
-          >
-            {btn.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Step 6: Notifications ─────────────────────────────────────────
-
-function NotificationsScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
-
-  return (
-    <div
-      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-end px-5 pb-14"
-      style={{ backgroundImage: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,107,44,0.05) 0%, transparent 60%)' }}
-    >
-      <div className="mb-6 text-center">
-        <p className="text-[13px] text-[#555] uppercase tracking-[1.5px]">Notifications</p>
-      </div>
-
-      <div
-        className="w-full max-w-[390px] bg-[#1C1C1E] rounded-[20px] overflow-hidden"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)',
-        }}
-      >
-        <div className="px-6 pt-7 pb-5 text-center">
-          <div className="w-[60px] h-[60px] bg-[#FF6B2C] rounded-[16px] flex items-center justify-center text-[28px] mx-auto mb-4 shadow-[0_4px_20px_rgba(255,107,44,0.35)]">
-            🔔
-          </div>
-          <h2 className="text-white text-[17px] font-semibold mb-2 leading-snug">
-            « ZESPOT » souhaite vous envoyer des notifications
-          </h2>
-          <p className="text-[#8E8E93] text-[13px] leading-relaxed">
-            Soyez alerté quand vos amis rejoignent la session et quand le spot idéal est trouvé.
+            Votre position permet de calculer le point de rencontre idéal entre vous et vos amis.
           </p>
         </div>
 
@@ -364,15 +364,15 @@ function NotificationsScreen({ onChoice }: { onChoice: (allow: boolean) => void 
 
         <button
           onClick={() => onChoice(false)}
-          className="w-full py-4 text-[#FF453A] text-[17px] text-center border-b border-[#3A3A3C] transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
+          className="w-full py-[14px] text-[#FF453A] text-[17px] text-center border-b border-[#3A3A3C] transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
         >
           Ne pas autoriser
         </button>
         <button
           onClick={() => onChoice(true)}
-          className="w-full py-4 text-[#0A84FF] text-[17px] font-semibold text-center transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
+          className="w-full py-[14px] text-[#0A84FF] text-[17px] font-semibold text-center transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
         >
-          Autoriser
+          Autoriser lors de l&apos;utilisation
         </button>
       </div>
     </div>
@@ -387,9 +387,10 @@ export default function OnboardingPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
 
+  // Auto-advance splash after animation
   useEffect(() => {
     if (step !== 'splash') return;
-    const t = setTimeout(() => setStep('launch'), 2700);
+    const t = setTimeout(() => setStep('launch'), 2800);
     return () => clearTimeout(t);
   }, [step]);
 
@@ -401,8 +402,8 @@ export default function OnboardingPage() {
     setStep('location');
   };
 
-  const handleLocation = (choice: 'deny' | 'once' | 'always') => {
-    if (choice !== 'deny' && navigator.geolocation) {
+  const handleLocation = (allow: boolean) => {
+    if (allow && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           try {
@@ -411,15 +412,8 @@ export default function OnboardingPage() {
             if (data.address) sessionStorage.setItem('myAddress', data.address);
           } catch { /* ignore */ }
         },
-        () => { /* ignore denied */ }
+        () => { /* denied */ }
       );
-    }
-    setStep('notifications');
-  };
-
-  const handleNotifications = async (allow: boolean) => {
-    if (allow && 'Notification' in window && Notification.permission === 'default') {
-      await Notification.requestPermission();
     }
     router.push('/soiree');
   };
@@ -431,7 +425,6 @@ export default function OnboardingPage() {
     <AuthScreen name={name} setName={setName} email={email} setEmail={setEmail} onContinue={handleAuth} />
   );
   if (step === 'location') return <LocationScreen onChoice={handleLocation} />;
-  if (step === 'notifications') return <NotificationsScreen onChoice={handleNotifications} />;
 
   return null;
 }

@@ -14,6 +14,16 @@ const TABS = [
     ),
   },
   {
+    label: 'Spot',
+    href: '/find',
+    icon: (active: boolean) => (
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={active ? '#FF6B2C' : '#555'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+        <circle cx="12" cy="9" r="2.5" />
+      </svg>
+    ),
+  },
+  {
     label: 'Profil',
     href: '/profile',
     icon: (active: boolean) => (
@@ -25,14 +35,16 @@ const TABS = [
   },
 ];
 
-// Pages where the bottom nav is hidden
-const HIDDEN: string[] = ['/'];
+const HIDDEN_PREFIXES = ['/', '/onboarding', '/join'];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (HIDDEN.includes(pathname) || pathname.startsWith('/onboarding')) return null;
+  const hidden = HIDDEN_PREFIXES.some((p) =>
+    p === '/' ? pathname === '/' : pathname.startsWith(p)
+  );
+  if (hidden) return null;
 
   return (
     <nav
