@@ -4,16 +4,6 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const TABS = [
   {
-    label: 'Spot',
-    href: '/find',
-    icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={active ? '#FF6B2C' : '#555'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-    ),
-  },
-  {
     label: 'Soirées',
     href: '/soiree',
     icon: (active: boolean) => (
@@ -35,19 +25,20 @@ const TABS = [
   },
 ];
 
-const HIDDEN_PATHS = ['/onboarding', '/'];
+// Pages where the bottom nav is hidden
+const HIDDEN: string[] = ['/'];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (HIDDEN_PATHS.some((p) => pathname === p || pathname.startsWith('/onboarding'))) return null;
+  if (HIDDEN.includes(pathname) || pathname.startsWith('/onboarding')) return null;
 
   return (
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex items-center border-t border-[#1A1A1A]"
       style={{
-        background: 'rgba(10,10,10,0.92)',
+        background: 'rgba(10,10,10,0.93)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
