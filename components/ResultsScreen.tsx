@@ -2,25 +2,27 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { LatLng, Place } from '@/lib/types';
+import { LatLng, Place, TransportMode } from '@/lib/types';
 import SpotCard from './SpotCard';
 
-// Dynamic import avoids SSR issues with Leaflet (window is undefined server-side)
 const Map = dynamic(() => import('./Map'), { ssr: false });
 
 interface Props {
   coords: (LatLng & { formatted: string })[];
   midpoint: LatLng;
   places: Place[];
+  mode: TransportMode;
   onBack: () => void;
 }
 
-export default function ResultsScreen({ coords, midpoint, places, onBack }: Props) {
+export default function ResultsScreen({ coords, midpoint, places, mode, onBack }: Props) {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+
+  const hasTravelTimes = places.some((p) => p.travelTimes && p.travelTimes.length > 0);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#0A0A0A]">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center justify-between px-6 py-[18px] border-b border-[#2A2A2A] flex-shrink-0">
         <div className="text-[22px] font-bold tracking-[-1px]">
           ZESP<span className="text-[#FF6B2C]">0</span>T
@@ -33,7 +35,7 @@ export default function ResultsScreen({ coords, midpoint, places, onBack }: Prop
         </button>
       </div>
 
-      {/* ── Body ── */}
+      {/* Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Map */}
         <div className="flex-1">
@@ -50,7 +52,8 @@ export default function ResultsScreen({ coords, midpoint, places, onBack }: Prop
           <h2 className="text-[18px] font-semibold mb-1">Le Spot 🎯</h2>
           <p className="text-[12px] text-[#888] mb-5">
             {places.length} bar{places.length !== 1 ? 's' : ''} trouvé
-            {places.length !== 1 ? 's' : ''} autour du point central
+            {places.length !== 1 ? 's' : ''}
+            {hasTravelTimes ? ' · trié par temps de trajet max' : ' · autour du point central'}
           </p>
 
           <div className="flex flex-col gap-2.5">
@@ -66,6 +69,7 @@ export default function ResultsScreen({ coords, midpoint, places, onBack }: Prop
                   key={p.place_id}
                   place={p}
                   rank={i + 1}
+                  mode={mode}
                   onClick={() => setSelectedPlaceId(p.place_id)}
                 />
               ))

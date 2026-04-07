@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import HomeScreen from '@/components/HomeScreen';
 import LoadingScreen from '@/components/LoadingScreen';
 import ResultsScreen from '@/components/ResultsScreen';
-import { AddressItem, Place, LatLng } from '@/lib/types';
+import { AddressItem, Place, LatLng, TransportMode } from '@/lib/types';
 import { getMidpoint, haversine, uid, sleep } from '@/lib/utils';
 
 type Screen = 'home' | 'loading' | 'results';
 
 export default function FindPage() {
   const [screen, setScreen] = useState<Screen>('home');
+  const [mode, setMode] = useState<TransportMode>('transit');
   const [addresses, setAddresses] = useState<AddressItem[]>([
     { id: uid(), value: '' },
     { id: uid(), value: '' },
@@ -22,7 +23,7 @@ export default function FindPage() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [error, setError] = useState('');
 
-  // Pre-fill first address from geolocation (set during onboarding)
+  // Pre-fill first address from geolocation set during onboarding
   useEffect(() => {
     const saved = sessionStorage.getItem('myAddress');
     if (saved) {
@@ -57,7 +58,7 @@ export default function FindPage() {
 
       // ── Step 2: Calculate midpoint ──
       setLoadingStep(2);
-      await sleep(400);
+      await sleep(300);
       const mid = getMidpoint(geocoded);
       setMidpoint(mid);
 
@@ -66,25 +67,53 @@ export default function FindPage() {
       let res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=800`);
       let data = await res.json();
       let rawPlaces = data.places || [];
-
-      // Expand radius if too few results
       if (rawPlaces.length < 3) {
         res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=1500`);
         data = await res.json();
         rawPlaces = data.places || [];
       }
 
-      // Enrich with distance from midpoint, sort, cap
-      const sorted: Place[] = rawPlaces
+      // Add geographic distance, take top 10 candidates for travel time calc
+      let candidates: Place[] = rawPlaces
         .map((p: Omit<Place, 'dist'>) => ({
           ...p,
           dist: haversine(mid.lat, mid.lng, p.lat, p.lng),
         }))
         .sort((a: Place, b: Place) => a.dist - b.dist)
-        .slice(0, 15);
+        .slice(0, 10);
 
-      setPlaces(sorted);
-      await sleep(500);
+      // ── Step 4: Calculate real travel times ──
+      setLoadingStep(4);
+      try {
+        const origins = geocoded.map((c) => `${c.lat},${c.lng}`).join('|');
+        const destinations = candidates.map((p) => `${p.lat},${p.lng}`).join('|');
+        const ttRes = await fetch(
+          `/api/travel-times?origins=${encodeURIComponent(origins)}&destinations=${encodeURIComponent(destinations)}&mode=${mode}`
+        );
+        const ttData = await ttRes.json();
+
+        if (ttData.matrix) {
+          // Attach per-person travel times to each place (matrix is [origin][dest])
+          candidates = candidates.map((place, j) => ({
+            ...place,
+            travelTimes: ttData.matrix.map((row: (number | null)[]) => row[j]),
+          }));
+
+          // Re-rank: minimize the maximum travel time (most equitable spot)
+          candidates.sort((a, b) => {
+            const validA = (a.travelTimes || []).filter((t): t is number => t !== null);
+            const validB = (b.travelTimes || []).filter((t): t is number => t !== null);
+            const maxA = validA.length ? Math.max(...validA) : Infinity;
+            const maxB = validB.length ? Math.max(...validB) : Infinity;
+            return maxA - maxB;
+          });
+        }
+      } catch {
+        // Travel times unavailable — keep geographic sort, no big deal
+      }
+
+      await sleep(400);
+      setPlaces(candidates.slice(0, 15));
       setScreen('results');
     } catch (err: unknown) {
       setScreen('home');
@@ -101,6 +130,8 @@ export default function FindPage() {
           onFind={findSpot}
           error={error}
           setError={setError}
+          mode={mode}
+          setMode={setMode}
         />
       )}
       {screen === 'loading' && <LoadingScreen step={loadingStep} />}
@@ -109,6 +140,7 @@ export default function FindPage() {
           coords={coords}
           midpoint={midpoint}
           places={places}
+          mode={mode}
           onBack={() => setScreen('home')}
         />
       )}
