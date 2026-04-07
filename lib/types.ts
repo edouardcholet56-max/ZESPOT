@@ -37,3 +37,22 @@ export interface Session {
   participants: SessionParticipant[];
   createdAt: number;
 }
+
+export interface EventParticipant {
+  id: string;
+  name: string;
+  address?: string;
+  joinedAt: number;
+}
+
+export interface SoireeEvent {
+  id: string;
+  name: string;
+  date: string;       // "2026-04-20"
+  time?: string;      // "20:00"
+  description?: string;
+  createdBy: string;
+  createdAt: number;
+  participants: EventParticipant[];
+  mode: TransportMode;
+}

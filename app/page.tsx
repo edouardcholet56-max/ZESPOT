@@ -20,12 +20,20 @@ export default function HomePage() {
         <p className="text-[13px] tracking-[5px] uppercase text-[#555] mt-3 mb-16">
           Find the perfect spot
         </p>
-        <button
-          onClick={() => router.push('/onboarding')}
-          className="px-10 py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] tracking-[0.3px] transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] active:translate-y-0"
-        >
-          Commencer →
-        </button>
+        <div className="flex flex-col gap-3 items-center">
+          <button
+            onClick={() => router.push('/onboarding')}
+            className="w-[260px] px-10 py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] tracking-[0.3px] transition-all hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)] active:translate-y-0"
+          >
+            Trouver un spot →
+          </button>
+          <button
+            onClick={() => router.push('/soiree')}
+            className="w-[260px] px-10 py-4 bg-transparent border border-[#2A2A2A] text-[#888] text-[15px] font-semibold rounded-[14px] tracking-[0.3px] transition-all hover:border-[#FF6B2C] hover:text-white active:translate-y-0"
+          >
+            Organiser une soirée 🎉
+          </button>
+        </div>
       </div>
     </div>
   );
