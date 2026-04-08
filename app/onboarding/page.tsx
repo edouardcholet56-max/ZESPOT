@@ -292,6 +292,95 @@ function LaunchScreen({ onContinue }: { onContinue: () => void }) {
 
 // ── Step 4: Auth ──────────────────────────────────────────────────
 
+type SocialProvider = 'facebook' | 'google' | 'apple';
+
+// Fake OAuth popup simulator — opens a small window, resolves after user "logs in"
+function fakeSocialAuth(provider: SocialProvider): Promise<{ name: string; email: string }> {
+  return new Promise((resolve, reject) => {
+    const titles: Record<SocialProvider, string> = {
+      facebook: 'Connexion Facebook',
+      google: 'Se connecter avec Google',
+      apple: 'Connexion avec Apple',
+    };
+    const colors: Record<SocialProvider, string> = {
+      facebook: '#1877F2',
+      google: '#fff',
+      apple: '#000',
+    };
+    const textColors: Record<SocialProvider, string> = {
+      facebook: '#fff',
+      google: '#1A1A1A',
+      apple: '#fff',
+    };
+
+    const w = 480, h = 600;
+    const left = window.screenX + (window.outerWidth - w) / 2;
+    const top = window.screenY + (window.outerHeight - h) / 2;
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${titles[provider]}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:${colors[provider]};color:${textColors[provider]};display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px}
+    .logo{font-size:48px;margin-bottom:20px}
+    h1{font-size:22px;font-weight:700;margin-bottom:8px;text-align:center}
+    p{font-size:13px;opacity:0.6;margin-bottom:32px;text-align:center}
+    input{width:100%;padding:14px 16px;border-radius:10px;border:1.5px solid ${provider === 'google' ? '#E0E0E0' : 'rgba(255,255,255,0.2)'};background:${provider === 'google' ? '#F8F8F8' : 'rgba(255,255,255,0.1)'};color:${textColors[provider]};font-size:15px;margin-bottom:12px;outline:none}
+    input::placeholder{opacity:0.5}
+    button{width:100%;padding:15px;border-radius:10px;border:none;background:${provider === 'google' ? '#1A73E8' : 'rgba(255,255,255,0.2)'};color:${provider === 'google' ? '#fff' : textColors[provider]};font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s}
+    button:hover{opacity:0.85}
+    .err{color:#FF453A;font-size:12px;margin-top:-8px;margin-bottom:12px;display:none}
+  </style>
+</head>
+<body>
+  <div class="logo">${provider === 'facebook' ? '📘' : provider === 'google' ? '🔵' : '🍎'}</div>
+  <h1>${titles[provider]}</h1>
+  <p>Connecte-toi pour continuer sur ZESPOT</p>
+  <input id="name" type="text" placeholder="Prénom" autocomplete="given-name" />
+  <input id="email" type="email" placeholder="E-mail" autocomplete="email" />
+  <div class="err" id="err">Remplis les deux champs.</div>
+  <button onclick="submit()">Se connecter</button>
+  <script>
+    function submit() {
+      var n = document.getElementById('name').value.trim();
+      var e = document.getElementById('email').value.trim();
+      if (!n || !e.includes('@')) { document.getElementById('err').style.display='block'; return; }
+      window.opener.postMessage({zespot:true,name:n,email:e}, '*');
+      window.close();
+    }
+    document.getElementById('email').addEventListener('keydown', function(ev){ if(ev.key==='Enter') submit(); });
+  </script>
+</body>
+</html>`;
+
+    const popup = window.open('', titles[provider], `width=${w},height=${h},left=${left},top=${top},resizable=no,scrollbars=no`);
+    if (!popup) { reject(new Error('popup_blocked')); return; }
+    popup.document.write(html);
+    popup.document.close();
+
+    const handler = (ev: MessageEvent) => {
+      if (ev.data?.zespot) {
+        window.removeEventListener('message', handler);
+        resolve({ name: ev.data.name, email: ev.data.email });
+      }
+    };
+    window.addEventListener('message', handler);
+
+    // Detect popup closed without submitting
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        window.removeEventListener('message', handler);
+        reject(new Error('closed'));
+      }
+    }, 500);
+  });
+}
+
 function AuthScreen({
   name, setName, email, setEmail, onContinue,
 }: {
@@ -299,7 +388,34 @@ function AuthScreen({
   email: string; setEmail: (v: string) => void;
   onContinue: () => void;
 }) {
+  const [loading, setLoading] = useState<SocialProvider | null>(null);
+  const [error, setError] = useState('');
   const isValid = name.trim().length > 0 && email.includes('@');
+
+  const handleSocial = async (provider: SocialProvider) => {
+    setError('');
+    setLoading(provider);
+    try {
+      const result = await fakeSocialAuth(provider);
+      setName(result.name);
+      setEmail(result.email);
+      // Small delay so user sees it filled in before proceeding
+      setTimeout(onContinue, 400);
+    } catch (err: unknown) {
+      setLoading(null);
+      if (err instanceof Error && err.message === 'popup_blocked') {
+        setError("Les popups sont bloquées. Autorise-les dans ton navigateur.");
+      }
+      // If user closed popup, do nothing
+    }
+  };
+
+  const Spinner = () => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ animation: 'spin 0.8s linear infinite' }}>
+      <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2" strokeDasharray="32" strokeDashoffset="10" strokeLinecap="round"/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </svg>
+  );
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-6 py-10 flex flex-col">
@@ -337,15 +453,16 @@ function AuthScreen({
           className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-4 text-[15px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
         />
         <button
-          onClick={isValid ? onContinue : undefined}
+          onClick={isValid ? onContinue : () => setError('Remplis ton prénom et un e-mail valide.')}
           className={`w-full py-4 rounded-[14px] text-[15px] font-semibold transition-all ${
             isValid
               ? 'bg-[#FF6B2C] text-white hover:bg-[#ff7d45] hover:-translate-y-[1px] hover:shadow-[0_10px_32px_rgba(255,107,44,0.28)]'
-              : 'bg-[#1C1C1C] text-[#333] cursor-not-allowed'
+              : 'bg-[#1C1C1C] text-[#555] active:scale-[0.98]'
           }`}
         >
           Continuer
         </button>
+        {error && <p className="text-[12px] text-[#FF453A] text-center -mt-1">{error}</p>}
       </div>
 
       <div className="flex items-center gap-3 my-5">
@@ -356,25 +473,28 @@ function AuthScreen({
 
       <div className="flex flex-col gap-3">
         <button
-          onClick={onContinue}
-          className="w-full py-4 bg-[#1877F2] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+          onClick={() => !loading && handleSocial('facebook')}
+          disabled={!!loading}
+          className="w-full py-4 bg-[#1877F2] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
         >
-          <FacebookIcon />
-          Continuer avec Facebook
+          {loading === 'facebook' ? <Spinner /> : <FacebookIcon />}
+          {loading === 'facebook' ? 'Connexion…' : 'Continuer avec Facebook'}
         </button>
         <button
-          onClick={onContinue}
-          className="w-full py-4 bg-white rounded-[14px] flex items-center justify-center gap-3 text-[#1A1A1A] text-[15px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+          onClick={() => !loading && handleSocial('google')}
+          disabled={!!loading}
+          className="w-full py-4 bg-white rounded-[14px] flex items-center justify-center gap-3 text-[#1A1A1A] text-[15px] font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
         >
-          <GoogleIcon />
-          Continuer avec Google
+          {loading === 'google' ? <Spinner /> : <GoogleIcon />}
+          {loading === 'google' ? 'Connexion…' : 'Continuer avec Google'}
         </button>
         <button
-          onClick={onContinue}
-          className="w-full py-4 bg-[#1A1A1A] border border-[#333] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:border-[#555] active:scale-[0.98]"
+          onClick={() => !loading && handleSocial('apple')}
+          disabled={!!loading}
+          className="w-full py-4 bg-[#1A1A1A] border border-[#333] rounded-[14px] flex items-center justify-center gap-3 text-white text-[15px] font-semibold transition-all hover:border-[#555] active:scale-[0.98] disabled:opacity-60"
         >
-          <AppleIcon />
-          Continuer avec Apple
+          {loading === 'apple' ? <Spinner /> : <AppleIcon />}
+          {loading === 'apple' ? 'Connexion…' : 'Continuer avec Apple'}
         </button>
       </div>
 
