@@ -35,15 +35,18 @@ const TABS = [
   },
 ];
 
-const HIDDEN_PREFIXES = ['/', '/onboarding', '/join', '/find'];
+// exact paths to hide nav
+const HIDDEN_EXACT = ['/', '/soiree', '/find'];
+// prefix paths to hide nav
+const HIDDEN_PREFIX = ['/onboarding', '/join'];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const hidden = HIDDEN_PREFIXES.some((p) =>
-    p === '/' ? pathname === '/' : pathname.startsWith(p)
-  );
+  const hidden =
+    HIDDEN_EXACT.includes(pathname) ||
+    HIDDEN_PREFIX.some((p) => pathname.startsWith(p));
   if (hidden) return null;
 
   return (
