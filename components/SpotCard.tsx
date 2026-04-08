@@ -7,6 +7,7 @@ interface Props {
   rank: number;
   mode: TransportMode;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
 const PRICE = ['', '€', '€€', '€€€', '€€€€'];
@@ -23,7 +24,7 @@ function formatTime(seconds: number | null | undefined): string {
   return `${mins} min`;
 }
 
-export default function SpotCard({ place, rank, mode, onClick }: Props) {
+export default function SpotCard({ place, rank, mode, onClick, isSelected = false }: Props) {
   const [imgError, setImgError] = useState(false);
   const isTop = rank === 1;
 
@@ -32,7 +33,7 @@ export default function SpotCard({ place, rank, mode, onClick }: Props) {
   if (place.open_now === false) tags.push('Fermé');
   if (place.price_level != null) tags.push(PRICE[place.price_level] || '');
 
-  const tagClass = isTop
+  const tagClass = isSelected
     ? 'bg-[rgba(255,107,44,0.15)] text-[#FF6B2C]'
     : 'bg-[#1C1C1C] text-[#888]';
 
@@ -49,7 +50,7 @@ export default function SpotCard({ place, rank, mode, onClick }: Props) {
     <div
       onClick={onClick}
       className={`rounded-[14px] overflow-hidden cursor-pointer transition-all duration-[180ms] ${
-        isTop
+        isSelected
           ? 'bg-[rgba(255,107,44,0.06)] border border-[#FF6B2C]'
           : 'bg-[#141414] border border-[#2A2A2A] hover:border-[rgba(255,107,44,0.5)] hover:bg-[#1C1C1C]'
       }`}
@@ -77,7 +78,7 @@ export default function SpotCard({ place, rank, mode, onClick }: Props) {
         {/* Rank badge */}
         <div
           className={`absolute top-2.5 left-2.5 w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg ${
-            isTop ? 'bg-[#FF6B2C] text-white' : 'bg-black/60 text-white backdrop-blur-sm'
+            isSelected || isTop ? 'bg-[#FF6B2C] text-white' : 'bg-black/60 text-white backdrop-blur-sm'
           }`}
         >
           {rank}

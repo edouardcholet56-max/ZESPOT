@@ -224,13 +224,15 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
 
   const hasTravelTimes = places.some((p) => p.travelTimes && p.travelTimes.length > 0);
 
-  // Called from map marker click → scroll to card + highlight, don't open sheet
+  // Called from map marker click → highlight card + scroll it to top of list
   const handlePlaceSelect = (place: Place) => {
     setSelectedCardId(place.place_id);
     setTimeout(() => {
       const el = cardRefs.current.get(place.place_id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const list = listRef.current;
+      if (el && list) {
+        const elTop = el.offsetTop - list.offsetTop;
+        list.scrollTo({ top: elTop - 8, behavior: 'smooth' });
       }
     }, 50);
   };
@@ -278,21 +280,17 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
             </p>
           ) : (
             places.map((p, i) => {
-              const isHighlighted = selectedCardId === p.place_id && !selectedPlace;
+              const isSelected = selectedCardId === p.place_id;
               return (
                 <div
                   key={p.place_id}
                   ref={(el) => { if (el) cardRefs.current.set(p.place_id, el); }}
-                  style={{
-                    borderRadius: 16,
-                    outline: isHighlighted ? '2px solid #FF6B2C' : '2px solid transparent',
-                    transition: 'outline 0.2s',
-                  }}
                 >
                   <SpotCard
                     place={p}
                     rank={i + 1}
                     mode={mode}
+                    isSelected={isSelected}
                     onClick={() => { setSelectedPlace(p); setSelectedCardId(p.place_id); }}
                   />
                 </div>
