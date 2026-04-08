@@ -101,6 +101,9 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       sessionStorage.setItem(`event_${eventId}_me`, JSON.stringify({ name: joinName.trim(), isCreator: false }));
+      // Track in profile
+      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
+      if (!ids.includes(eventId)) sessionStorage.setItem('myEventIds', JSON.stringify([eventId, ...ids]));
       setMyName(joinName.trim());
       setEvent(data.event);
       setShowJoin(false);

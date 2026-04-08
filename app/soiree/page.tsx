@@ -92,6 +92,9 @@ export default function SoireePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       sessionStorage.setItem(`event_${data.id}_me`, JSON.stringify({ name: creatorName.trim(), isCreator: true }));
+      // Track in profile
+      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
+      if (!ids.includes(data.id)) sessionStorage.setItem('myEventIds', JSON.stringify([data.id, ...ids]));
       router.push(`/soiree/${data.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de la création.');
