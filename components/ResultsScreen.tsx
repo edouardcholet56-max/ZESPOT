@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { LatLng, Place, TransportMode } from '@/lib/types';
 import SpotCard from './SpotCard';
 
-const Map = dynamic(() => import('./Map'), { ssr: false });
+const MapView = dynamic(() => import('./Map'), { ssr: false });
 
 interface Props {
   coords: (LatLng & { formatted: string })[];
@@ -217,8 +217,23 @@ function SpotDetailSheet({
 
 export default function ResultsScreen({ coords, midpoint, places, mode, onBack }: Props) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  // selectedCardId = highlighted card (from map click), without opening the sheet
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const listRef = useRef<HTMLDivElement>(null);
 
   const hasTravelTimes = places.some((p) => p.travelTimes && p.travelTimes.length > 0);
+
+  // Called from map marker click → scroll to card + highlight, don't open sheet
+  const handlePlaceSelect = (place: Place) => {
+    setSelectedCardId(place.place_id);
+    setTimeout(() => {
+      const el = cardRefs.current.get(place.place_id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 50);
+  };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#0A0A0A]">
@@ -237,16 +252,17 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
 
       {/* Map */}
       <div className="h-[42vh] flex-shrink-0">
-        <Map
+        <MapView
           coords={coords}
           midpoint={midpoint}
           places={places}
-          selectedPlaceId={selectedPlace?.place_id ?? null}
+          selectedPlaceId={selectedPlace?.place_id ?? selectedCardId}
+          onPlaceSelect={handlePlaceSelect}
         />
       </div>
 
       {/* Results */}
-      <div className="flex-1 overflow-y-auto bg-[#0A0A0A]">
+      <div ref={listRef} className="flex-1 overflow-y-auto bg-[#0A0A0A]">
         <div className="px-4 pt-4 pb-1 flex items-baseline gap-2">
           <h2 className="text-[16px] font-semibold">Le Spot 🎯</h2>
           <p className="text-[11px] text-[#555]">
@@ -261,15 +277,27 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
               Aucun bar trouvé dans ce secteur.<br />Essaie des adresses plus proches.
             </p>
           ) : (
-            places.map((p, i) => (
-              <SpotCard
-                key={p.place_id}
-                place={p}
-                rank={i + 1}
-                mode={mode}
-                onClick={() => setSelectedPlace(p)}
-              />
-            ))
+            places.map((p, i) => {
+              const isHighlighted = selectedCardId === p.place_id && !selectedPlace;
+              return (
+                <div
+                  key={p.place_id}
+                  ref={(el) => { if (el) cardRefs.current.set(p.place_id, el); }}
+                  style={{
+                    borderRadius: 16,
+                    outline: isHighlighted ? '2px solid #FF6B2C' : '2px solid transparent',
+                    transition: 'outline 0.2s',
+                  }}
+                >
+                  <SpotCard
+                    place={p}
+                    rank={i + 1}
+                    mode={mode}
+                    onClick={() => { setSelectedPlace(p); setSelectedCardId(p.place_id); }}
+                  />
+                </div>
+              );
+            })
           )}
         </div>
       </div>
