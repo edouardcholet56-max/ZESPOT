@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redis } from '@/lib/redis';
-import { SoireeEvent, EventParticipant, TransportMode } from '@/lib/types';
+import { SoireeEvent, EventParticipant, TransportMode, SpotFilters } from '@/lib/types';
 
 function makeId(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -9,7 +9,7 @@ function makeId(): string {
 // POST /api/event — create a new event
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, date, time, description, createdBy, creatorAddress, mode } = body;
+  const { name, date, time, description, createdBy, creatorAddress, mode, filters } = body;
 
   if (!name || !date || !createdBy) {
     return NextResponse.json({ error: 'name, date and createdBy required' }, { status: 400 });
@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
     createdAt: Date.now(),
     participants: [creator],
     mode: (mode as TransportMode) || 'transit',
+    filters: (filters as SpotFilters) || undefined,
   };
 
   await redis.set(`event:${id}`, event, 60 * 60 * 24 * 14); // 14 days TTL

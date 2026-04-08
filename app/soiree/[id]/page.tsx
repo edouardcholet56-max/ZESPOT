@@ -142,13 +142,20 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       await sleep(200);
       const mid = getMidpoint(geocoded);
 
-      // 3. Find bars
+      // 3. Find bars (with filters if set)
       setFindStep(3);
-      let res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=800`);
+      const f = event.filters;
+      const filterParams = new URLSearchParams();
+      if (f?.vibes?.length)   filterParams.set('vibes', f.vibes.join(','));
+      if (f?.price)           filterParams.set('maxprice', String(f.price));
+      if (f?.openNow)         filterParams.set('opennow', 'true');
+      const fStr = filterParams.toString() ? `&${filterParams.toString()}` : '';
+
+      let res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=800${fStr}`);
       let data = await res.json();
       let rawPlaces = data.places || [];
       if (rawPlaces.length < 3) {
-        res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=1500`);
+        res = await fetch(`/api/places?lat=${mid.lat}&lng=${mid.lng}&radius=1500${fStr}`);
         data = await res.json();
         rawPlaces = data.places || [];
       }

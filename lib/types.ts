@@ -45,6 +45,23 @@ export interface EventParticipant {
   joinedAt: number;
 }
 
+export type SpotVibe =
+  | 'darts'
+  | 'billiard'
+  | 'sports'
+  | 'cocktails'
+  | 'live'
+  | 'terrace'
+  | 'games'
+  | 'rooftop';
+
+export interface SpotFilters {
+  vibes: SpotVibe[];
+  price?: 1 | 2 | 3;    // 1=€  2=€€  3=€€€
+  openNow?: boolean;
+  lateClosure?: boolean;
+}
+
 export interface SoireeEvent {
   id: string;
   name: string;
@@ -55,4 +72,5 @@ export interface SoireeEvent {
   createdAt: number;
   participants: EventParticipant[];
   mode: TransportMode;
+  filters?: SpotFilters;
 }

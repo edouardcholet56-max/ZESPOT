@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TransportMode } from '@/lib/types';
+import { TransportMode, SpotVibe, SpotFilters } from '@/lib/types';
 
 type View = 'home' | 'create' | 'join';
 
@@ -10,6 +10,23 @@ const MODE_OPTS: { value: TransportMode; icon: string; label: string }[] = [
   { value: 'walking', icon: '🚶', label: 'À pied' },
   { value: 'bicycling', icon: '🚲', label: 'Vélo' },
   { value: 'transit', icon: '🚇', label: 'Métro' },
+];
+
+const VIBE_OPTS: { value: SpotVibe; icon: string; label: string }[] = [
+  { value: 'darts',     icon: '🎯', label: 'Fléchettes' },
+  { value: 'billiard',  icon: '🎱', label: 'Billard' },
+  { value: 'sports',    icon: '⚽', label: 'Sportif' },
+  { value: 'cocktails', icon: '🍸', label: 'Cocktails' },
+  { value: 'live',      icon: '🎵', label: 'Live' },
+  { value: 'terrace',   icon: '🌿', label: 'Terrasse' },
+  { value: 'games',     icon: '🎮', label: 'Jeux' },
+  { value: 'rooftop',   icon: '🌆', label: 'Rooftop' },
+];
+
+const PRICE_OPTS: { value: 1 | 2 | 3; label: string }[] = [
+  { value: 1, label: '€' },
+  { value: 2, label: '€€' },
+  { value: 3, label: '€€€' },
 ];
 
 export default function SoireePage() {
@@ -25,6 +42,10 @@ export default function SoireePage() {
   const [creatorName, setCreatorName] = useState('');
   const [creatorAddress, setCreatorAddress] = useState('');
   const [mode, setMode] = useState<TransportMode>('transit');
+  const [vibes, setVibes] = useState<SpotVibe[]>([]);
+  const [price, setPrice] = useState<1 | 2 | 3 | undefined>(undefined);
+  const [openNow, setOpenNow] = useState(false);
+  const [lateClosure, setLateClosure] = useState(false);
   const [creating, setCreating] = useState(false);
 
   // Join form
@@ -60,6 +81,12 @@ export default function SoireePage() {
           createdBy: creatorName.trim(),
           creatorAddress: creatorAddress.trim() || undefined,
           mode,
+          filters: {
+            vibes,
+            price: price || undefined,
+            openNow: openNow || undefined,
+            lateClosure: lateClosure || undefined,
+          } as SpotFilters,
         }),
       });
       const data = await res.json();
@@ -238,6 +265,82 @@ export default function SoireePage() {
                     {m.icon} {m.label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* FILTERS */}
+            <div className="border-t border-[#1C1C1C] pt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <p className="text-[11px] text-[#555] uppercase tracking-[1px]">Filtres pour le spot</p>
+                <span className="text-[10px] text-[#FF6B2C] bg-[rgba(255,107,44,0.1)] px-2 py-0.5 rounded-full font-medium">Optionnel</span>
+              </div>
+
+              {/* Vibes */}
+              <p className="text-[11px] text-[#444] mb-2">Ambiance</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {VIBE_OPTS.map((v) => {
+                  const active = vibes.includes(v.value);
+                  return (
+                    <button
+                      key={v.value}
+                      type="button"
+                      onClick={() => setVibes(active ? vibes.filter((x) => x !== v.value) : [...vibes, v.value])}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12px] font-medium border transition-all ${
+                        active
+                          ? 'bg-[rgba(255,107,44,0.15)] border-[#FF6B2C] text-[#FF6B2C]'
+                          : 'bg-[#141414] border-[#2A2A2A] text-[#666] hover:border-[#3A3A3A]'
+                      }`}
+                    >
+                      <span>{v.icon}</span>
+                      <span>{v.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Price */}
+              <p className="text-[11px] text-[#444] mb-2">Budget</p>
+              <div className="flex gap-2 mb-4">
+                {PRICE_OPTS.map((p) => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setPrice(price === p.value ? undefined : p.value)}
+                    className={`flex-1 py-2 rounded-[10px] text-[13px] font-semibold border transition-all ${
+                      price === p.value
+                        ? 'bg-[rgba(255,107,44,0.15)] border-[#FF6B2C] text-[#FF6B2C]'
+                        : 'bg-[#141414] border-[#2A2A2A] text-[#666] hover:border-[#3A3A3A]'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Toggles */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOpenNow(!openNow)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[12px] font-medium border transition-all ${
+                    openNow
+                      ? 'bg-[rgba(255,107,44,0.15)] border-[#FF6B2C] text-[#FF6B2C]'
+                      : 'bg-[#141414] border-[#2A2A2A] text-[#666] hover:border-[#3A3A3A]'
+                  }`}
+                >
+                  ✅ Ouvert
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLateClosure(!lateClosure)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[12px] font-medium border transition-all ${
+                    lateClosure
+                      ? 'bg-[rgba(255,107,44,0.15)] border-[#FF6B2C] text-[#FF6B2C]'
+                      : 'bg-[#141414] border-[#2A2A2A] text-[#666] hover:border-[#3A3A3A]'
+                  }`}
+                >
+                  🌙 Ferme tard
+                </button>
               </div>
             </div>
 
