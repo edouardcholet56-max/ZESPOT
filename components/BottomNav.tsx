@@ -35,7 +35,7 @@ const TABS = [
   },
 ];
 
-const HIDDEN_PREFIXES = ['/', '/onboarding', '/join'];
+const HIDDEN_PREFIXES = ['/', '/onboarding', '/join', '/find'];
 
 export default function BottomNav() {
   const pathname = usePathname();

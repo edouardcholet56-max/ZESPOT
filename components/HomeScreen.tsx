@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { AddressItem, TransportMode, Session } from '@/lib/types';
 import { uid } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ export default function HomeScreen({
   mode,
   setMode,
 }: Props) {
+  const router = useRouter();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [creatingSession, setCreatingSession] = useState(false);
@@ -119,21 +121,25 @@ export default function HomeScreen({
 
   return (
     <div
-      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5 py-10 pb-28"
+      className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5 py-10"
       style={{
         backgroundImage:
           'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)',
       }}
     >
       <div className="w-full max-w-[460px]">
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <h1 className="text-[58px] font-bold tracking-[-3px] leading-none">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => router.back()}
+            className="text-[#555] text-[13px] hover:text-[#FF6B2C] transition-colors"
+          >
+            ← Retour
+          </button>
+          <h1 className="text-[22px] font-bold tracking-[-1px]">
             ZESP<span className="text-[#FF6B2C]">0</span>T
           </h1>
-          <p className="text-[12px] tracking-[4px] uppercase text-[#555] mt-2.5">
-            Find the perfect spot
-          </p>
+          <div className="w-12" />
         </div>
 
         <div className="bg-[#141414] border border-[#2A2A2A] rounded-[22px] p-8">
@@ -273,6 +279,18 @@ export default function HomeScreen({
             </div>
           )}
         </div>
+
+        {/* Create event CTA */}
+        <button
+          onClick={() => router.push('/soiree')}
+          className="w-full mt-4 py-4 bg-[#111] border border-[#2A2A2A] rounded-[16px] flex items-center justify-center gap-2 text-[14px] text-[#888] font-medium transition-all hover:border-[#FF6B2C] hover:text-white active:scale-[0.98]"
+        >
+          <span className="text-[18px]">🎉</span>
+          Créer un événement avec tes amis
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-1 opacity-50">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
       </div>
     </div>
   );

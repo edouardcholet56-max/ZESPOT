@@ -41,10 +41,71 @@ function TrackingScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
   useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   return (
-    <div
-      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6"
-      style={{ backgroundImage: 'radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,107,44,0.06) 0%, transparent 70%)' }}
-    >
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+
+      {/* ── City night illustration ── */}
+      <div className="absolute inset-0 pointer-events-none select-none">
+        {/* Sky glow */}
+        <div className="absolute bottom-0 left-0 right-0 h-[55%]" style={{ background: 'radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255,107,44,0.08) 0%, transparent 70%)' }} />
+        {/* Buildings SVG */}
+        <svg className="absolute bottom-0 left-0 right-0 w-full" viewBox="0 0 430 220" preserveAspectRatio="xMidYMax meet" fill="none">
+          {/* Back buildings */}
+          <rect x="0"   y="110" width="28" height="110" fill="#0F0F0F"/>
+          <rect x="4"   y="100" width="20" height="10"  fill="#111"/>
+          <rect x="30"  y="90"  width="35" height="130" fill="#111"/>
+          <rect x="33"  y="80"  width="29" height="10"  fill="#0F0F0F"/>
+          <rect x="68"  y="120" width="22" height="100" fill="#0F0F0F"/>
+          <rect x="93"  y="70"  width="45" height="150" fill="#111"/>
+          <rect x="97"  y="60"  width="37" height="10"  fill="#0F0F0F"/>
+          <rect x="100" y="50"  width="31" height="10"  fill="#111"/>
+          <rect x="141" y="100" width="30" height="120" fill="#0F0F0F"/>
+          <rect x="174" y="80"  width="50" height="140" fill="#111"/>
+          <rect x="178" y="65"  width="42" height="15"  fill="#0F0F0F"/>
+          <rect x="183" y="55"  width="32" height="10"  fill="#111"/>
+          <rect x="227" y="95"  width="38" height="125" fill="#0F0F0F"/>
+          <rect x="268" y="75"  width="48" height="145" fill="#111"/>
+          <rect x="272" y="62"  width="40" height="13"  fill="#0F0F0F"/>
+          <rect x="319" y="105" width="32" height="115" fill="#0F0F0F"/>
+          <rect x="354" y="85"  width="42" height="135" fill="#111"/>
+          <rect x="358" y="72"  width="34" height="13"  fill="#0F0F0F"/>
+          <rect x="399" y="115" width="31" height="105" fill="#111"/>
+          {/* Windows (tiny orange glows) */}
+          {[
+            [36,95],[44,95],[36,107],[44,107],[36,119],[44,119],
+            [98,75],[108,75],[98,88],[108,88],[98,101],[108,101],
+            [178,72],[190,72],[178,85],[190,85],
+            [272,70],[284,70],[272,83],[284,83],
+            [359,80],[370,80],[359,93],[370,93],
+          ].map(([x, y], i) => (
+            <rect key={i} x={x} y={y} width="5" height="4" rx="0.5" fill="rgba(255,180,80,0.35)" />
+          ))}
+          {/* Neon signs */}
+          <rect x="96"  y="140" width="22" height="6" rx="2" fill="rgba(255,107,44,0.5)"/>
+          <rect x="270" y="130" width="28" height="6" rx="2" fill="rgba(100,150,255,0.4)"/>
+          <rect x="356" y="120" width="20" height="6" rx="2" fill="rgba(255,107,44,0.35)"/>
+        </svg>
+
+        {/* Floating pins */}
+        {[
+          { x: '18%', y: '30%', size: 22, delay: '0s' },
+          { x: '72%', y: '22%', size: 18, delay: '0.6s' },
+          { x: '50%', y: '15%', size: 26, delay: '1.2s' },
+          { x: '85%', y: '38%', size: 16, delay: '0.3s' },
+        ].map((p, i) => (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: p.x, top: p.y,
+              fontSize: p.size,
+              opacity: 0.25,
+              animation: `floatPin 3.5s ease-in-out infinite`,
+              animationDelay: p.delay,
+            }}
+          >📍</div>
+        ))}
+      </div>
+      <style>{`@keyframes floatPin { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }`}</style>
       <div
         className="w-full max-w-[340px] bg-[#1C1C1E] rounded-[24px] p-6 shadow-2xl"
         style={{
@@ -332,10 +393,71 @@ function LocationScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
   useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   return (
-    <div
-      className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6"
-      style={{ backgroundImage: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(10,132,255,0.06) 0%, transparent 60%)' }}
-    >
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+
+      {/* ── Map illustration ── */}
+      <div className="absolute inset-0 pointer-events-none select-none">
+        {/* Blue glow center */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(10,132,255,0.06) 0%, transparent 65%)' }} />
+
+        {/* Map grid lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" viewBox="0 0 430 932" fill="none">
+          {/* Horizontal streets */}
+          {[120,200,280,360,440,520,600,680,760].map((y, i) => (
+            <line key={`h${i}`} x1="0" y1={y} x2="430" y2={y} stroke="#0A84FF" strokeWidth={i % 3 === 0 ? 1.5 : 0.8}/>
+          ))}
+          {/* Vertical streets */}
+          {[55,130,215,300,370,430].map((x, i) => (
+            <line key={`v${i}`} x1={x} y1="0" x2={x} y2="932" stroke="#0A84FF" strokeWidth={i % 2 === 0 ? 1.5 : 0.8}/>
+          ))}
+          {/* Blocks */}
+          <rect x="55"  y="200" width="75"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="215" y="120" width="85"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="130" y="280" width="85"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="300" y="200" width="70"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="55"  y="440" width="75"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="215" y="520" width="85"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="300" y="440" width="70"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+          <rect x="130" y="600" width="85"  height="80"  rx="4" fill="rgba(10,132,255,0.08)" stroke="#0A84FF" strokeWidth="0.5"/>
+        </svg>
+
+        {/* Pulsing rings at center */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          {[80, 140, 200].map((size, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full border border-[#0A84FF]"
+              style={{
+                width: size, height: size,
+                left: -size/2, top: -size/2,
+                opacity: 0.08 - i * 0.02,
+                animation: `pulseRing 2.5s ease-out infinite`,
+                animationDelay: `${i * 0.7}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Friend dots on map */}
+        {[
+          { x: '22%', y: '28%', color: '#FF6B2C' },
+          { x: '68%', y: '22%', color: '#6C63FF' },
+          { x: '78%', y: '62%', color: '#00C9A7' },
+          { x: '15%', y: '65%', color: '#FFA502' },
+        ].map((dot, i) => (
+          <div
+            key={i}
+            className="absolute w-2.5 h-2.5 rounded-full"
+            style={{
+              left: dot.x, top: dot.y,
+              backgroundColor: dot.color,
+              opacity: 0.5,
+              boxShadow: `0 0 8px ${dot.color}`,
+            }}
+          />
+        ))}
+      </div>
+      <style>{`@keyframes pulseRing { 0%{transform:scale(0.8);opacity:0.15} 100%{transform:scale(1.4);opacity:0} }`}</style>
       {/* Page label */}
       <p className="text-[12px] text-[#444] uppercase tracking-[1.5px] mb-8">Autorisation</p>
 
