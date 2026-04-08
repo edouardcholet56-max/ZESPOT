@@ -187,7 +187,10 @@ function SpotDetailSheet({
             )}
 
             {/* CTA buttons */}
-            <div className="flex gap-3">
+            <div
+              className="flex gap-3"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}
+            >
               <a
                 href={mapsUrl}
                 target="_blank"
