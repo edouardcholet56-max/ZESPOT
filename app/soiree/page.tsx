@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransportMode } from '@/lib/types';
+
+type View = 'home' | 'create' | 'join';
 
 const MODE_OPTS: { value: TransportMode; icon: string; label: string }[] = [
   { value: 'walking', icon: '🚶', label: 'À pied' },
@@ -12,9 +14,10 @@ const MODE_OPTS: { value: TransportMode; icon: string; label: string }[] = [
 
 export default function SoireePage() {
   const router = useRouter();
+  const [view, setView] = useState<View>('home');
+  const [userName, setUserName] = useState('');
 
-  // Create form
-  const [tab, setTab] = useState<'create' | 'join'>('create');
+  // Event form
   const [eventName, setEventName] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -29,6 +32,14 @@ export default function SoireePage() {
   const [joining, setJoining] = useState(false);
 
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const name = sessionStorage.getItem('userName') || '';
+    setUserName(name);
+    if (name) setCreatorName(name);
+    const addr = sessionStorage.getItem('myAddress') || '';
+    if (addr) setCreatorAddress(addr);
+  }, []);
 
   const handleCreate = async () => {
     if (!eventName.trim() || !date || !creatorName.trim()) {
@@ -53,7 +64,6 @@ export default function SoireePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      // Store creator identity in sessionStorage
       sessionStorage.setItem(`event_${data.id}_me`, JSON.stringify({ name: creatorName.trim(), isCreator: true }));
       router.push(`/soiree/${data.id}`);
     } catch (e: unknown) {
@@ -69,7 +79,7 @@ export default function SoireePage() {
     setJoining(true);
     try {
       const res = await fetch(`/api/event?id=${trimmed}`);
-      if (!res.ok) { setError('Code invalide — vérifie avec l\'organisateur.'); setJoining(false); return; }
+      if (!res.ok) { setError("Code invalide — vérifie avec l'organisateur."); setJoining(false); return; }
       router.push(`/soiree/${trimmed}`);
     } catch {
       setError('Erreur réseau.');
@@ -77,40 +87,70 @@ export default function SoireePage() {
     }
   };
 
-  return (
-    <div
-      className="min-h-screen bg-[#0A0A0A] px-5 py-8"
-      style={{ backgroundImage: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,107,44,0.08) 0%, transparent 70%)' }}
-    >
-      {/* Header */}
-      <div className="max-w-lg mx-auto">
-        <button onClick={() => router.push('/')} className="text-[#555] text-[13px] mb-8 hover:text-[#FF6B2C] transition-colors">
-          ← Accueil
+  // ── Home screen ───────────────────────────────────────────────────
+  if (view === 'home') {
+    return (
+      <div
+        className="min-h-screen bg-[#0A0A0A] flex flex-col px-6 pb-28"
+        style={{ backgroundImage: 'radial-gradient(ellipse 80% 45% at 50% 0%, rgba(255,107,44,0.10) 0%, transparent 65%)' }}
+      >
+        {/* Top */}
+        <div className="pt-14 mb-10">
+          <p className="text-[13px] text-[#555] mb-1">
+            {userName ? `Salut ${userName} 👋` : 'Bienvenue 👋'}
+          </p>
+          <h1 className="text-[34px] font-bold tracking-[-1.5px] leading-tight">
+            Crée ton<br />
+            <span className="text-[#FF6B2C]">ZESP<span className="text-white">0</span>T</span>
+          </h1>
+        </div>
+
+        {/* Main CTA */}
+        <button
+          onClick={() => { setError(''); setView('create'); }}
+          className="w-full rounded-[20px] p-5 mb-4 text-left transition-all active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, #FF6B2C 0%, #ff9a5c 100%)',
+            boxShadow: '0 12px 40px rgba(255,107,44,0.35)',
+          }}
+        >
+          <div className="text-[36px] mb-3">🎉</div>
+          <p className="text-white text-[11px] font-semibold uppercase tracking-[1.5px] mb-1 opacity-80">Nouveau</p>
+          <h2 className="text-white text-[22px] font-bold tracking-[-0.5px]">Créer un Zespot</h2>
+          <p className="text-white/70 text-[13px] mt-1">Organise un événement, invite tes amis.</p>
         </button>
 
-        <h1 className="text-[36px] font-bold tracking-[-2px] leading-tight mb-1">
-          Organisez votre
-        </h1>
-        <h1 className="text-[36px] font-bold tracking-[-2px] leading-tight mb-8">
-          soirée <span className="text-[#FF6B2C]">🎉</span>
-        </h1>
+        {/* Secondary CTA */}
+        <button
+          onClick={() => { setError(''); setView('join'); }}
+          className="w-full rounded-[20px] p-5 text-left bg-[#141414] border border-[#2A2A2A] transition-all active:scale-[0.98] hover:border-[#3A3A3A]"
+        >
+          <div className="text-[36px] mb-3">🔗</div>
+          <p className="text-[#888] text-[11px] font-semibold uppercase tracking-[1.5px] mb-1">Invité</p>
+          <h2 className="text-white text-[22px] font-bold tracking-[-0.5px]">Rejoindre un Zespot</h2>
+          <p className="text-[#555] text-[13px] mt-1">Entre le code partagé par l&apos;organisateur.</p>
+        </button>
+      </div>
+    );
+  }
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 p-1 bg-[#141414] rounded-[12px] border border-[#2A2A2A]">
-          {(['create', 'join'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => { setTab(t); setError(''); }}
-              className={`flex-1 py-2.5 text-[13px] font-semibold rounded-[10px] transition-all ${
-                tab === t
-                  ? 'bg-[#FF6B2C] text-white'
-                  : 'text-[#666] hover:text-white'
-              }`}
-            >
-              {t === 'create' ? '✨ Créer un événement' : '🔗 Rejoindre'}
-            </button>
-          ))}
-        </div>
+  // ── Create / Join forms ───────────────────────────────────────────
+  return (
+    <div
+      className="min-h-screen bg-[#0A0A0A] px-5 py-8 pb-28"
+      style={{ backgroundImage: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,107,44,0.07) 0%, transparent 70%)' }}
+    >
+      <div className="max-w-lg mx-auto">
+        <button
+          onClick={() => { setView('home'); setError(''); }}
+          className="text-[#555] text-[13px] mb-8 hover:text-[#FF6B2C] transition-colors"
+        >
+          ← Retour
+        </button>
+
+        <h1 className="text-[28px] font-bold tracking-[-1px] leading-tight mb-8">
+          {view === 'create' ? '✨ Créer un événement' : '🔗 Rejoindre un Zespot'}
+        </h1>
 
         {/* Error */}
         {error && (
@@ -120,14 +160,14 @@ export default function SoireePage() {
         )}
 
         {/* CREATE FORM */}
-        {tab === 'create' && (
+        {view === 'create' && (
           <div className="flex flex-col gap-4">
             <div>
-              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Nom de l'événement *</label>
+              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Nom de l&apos;événement *</label>
               <input
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                placeholder="Événement 30 ans de Paul, After work..."
+                placeholder="Anniversaire de Paul, After work..."
                 className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[14px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
               />
             </div>
@@ -143,7 +183,7 @@ export default function SoireePage() {
                   style={{ colorScheme: 'dark' }}
                 />
               </div>
-              <div className="w-[120px]">
+              <div className="w-[110px]">
                 <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Heure</label>
                 <input
                   type="time"
@@ -160,7 +200,7 @@ export default function SoireePage() {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Infos supplémentaires, thème, tenue..."
+                placeholder="Infos, thème, tenue..."
                 rows={2}
                 className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[14px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors resize-none"
               />
@@ -168,14 +208,12 @@ export default function SoireePage() {
 
             <div className="border-t border-[#1C1C1C] pt-4">
               <p className="text-[11px] text-[#555] uppercase tracking-[1px] mb-3">Ton profil</p>
-              <div className="flex gap-3">
-                <input
-                  value={creatorName}
-                  onChange={(e) => setCreatorName(e.target.value)}
-                  placeholder="Ton prénom *"
-                  className="flex-1 bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[14px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
-                />
-              </div>
+              <input
+                value={creatorName}
+                onChange={(e) => setCreatorName(e.target.value)}
+                placeholder="Ton prénom *"
+                className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[14px] text-white placeholder-[#444] focus:outline-none focus:border-[#FF6B2C] transition-colors"
+              />
               <input
                 value={creatorAddress}
                 onChange={(e) => setCreatorAddress(e.target.value)}
@@ -214,14 +252,14 @@ export default function SoireePage() {
         )}
 
         {/* JOIN FORM */}
-        {tab === 'join' && (
+        {view === 'join' && (
           <div className="flex flex-col gap-4">
             <div>
-              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Code de l'événement</label>
+              <label className="text-[11px] text-[#555] uppercase tracking-[1px] mb-1.5 block">Code de l&apos;événement</label>
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Ex: ABC123"
+                placeholder="ABC123"
                 maxLength={6}
                 className="w-full bg-[#141414] border border-[#2A2A2A] rounded-[10px] px-4 py-3 text-[20px] font-bold text-white text-center placeholder-[#333] tracking-[8px] focus:outline-none focus:border-[#FF6B2C] transition-colors uppercase"
               />
