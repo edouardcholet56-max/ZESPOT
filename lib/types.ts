@@ -18,6 +18,7 @@ export interface Place {
   open_now?: boolean;
   dist: number;
   photo_reference?: string;
+  photo_references?: string[];     // up to 3 photos
   travelTimes?: (number | null)[]; // seconds per participant, null if unavailable
 }
 

@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
       price_level: p.price_level ?? null,
       open_now: p.opening_hours?.open_now ?? null,
       photo_reference: p.photos?.[0]?.photo_reference ?? null,
+      photo_references: (p.photos || []).slice(0, 3).map((ph: { photo_reference: string }) => ph.photo_reference).filter(Boolean),
     }));
 
     return NextResponse.json({ places });
