@@ -173,9 +173,9 @@ export default function SoireePage() {
           <p className="text-white/70 text-[13px] mt-1">Trouve le bar idéal pour tout le groupe.</p>
         </button>
 
-        {/* Card 2 — Rejoindre un Zespot */}
+        {/* Card 2 — Rejoindre un Zespot → /evenements?view=join */}
         <button
-          onClick={() => { setError(''); setView('join'); }}
+          onClick={() => router.push('/evenements?view=join')}
           className="w-full rounded-[20px] p-5 mb-3 text-left bg-[#141414] border border-[#2A2A2A] transition-all active:scale-[0.98] hover:border-[#3A3A3A]"
         >
           <div className="text-[36px] mb-3">🔗</div>
@@ -184,9 +184,9 @@ export default function SoireePage() {
           <p className="text-[#555] text-[13px] mt-1">Entre le code partagé par l&apos;organisateur.</p>
         </button>
 
-        {/* Card 3 — Créer un événement */}
+        {/* Card 3 — Créer un événement → /evenements?view=create */}
         <button
-          onClick={() => { setError(''); setView('create'); }}
+          onClick={() => router.push('/evenements?view=create')}
           className="w-full rounded-[20px] p-5 text-left bg-[#141414] border border-[#2A2A2A] transition-all active:scale-[0.98] hover:border-[#3A3A3A]"
         >
           <div className="text-[36px] mb-3">🎉</div>

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const TABS = [
   {
     label: 'Événements',
-    href: '/soiree',
+    href: '/evenements',
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={active ? '#FF6B2C' : '#555'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" />
@@ -36,7 +36,7 @@ const TABS = [
 ];
 
 // exact paths to hide nav
-const HIDDEN_EXACT = ['/', '/soiree', '/find'];
+const HIDDEN_EXACT = ['/', '/soiree'];
 // prefix paths to hide nav
 const HIDDEN_PREFIX = ['/onboarding', '/join'];
 
