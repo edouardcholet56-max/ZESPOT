@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { LatLng, Place, TransportMode } from '@/lib/types';
 import SpotCard from './SpotCard';
 
@@ -25,12 +26,164 @@ function formatTime(seconds: number | null | undefined): string {
   return `${Math.round(seconds / 60)} min`;
 }
 
+// ── Confetti particle ─────────────────────────────────────────────
+
+const CONFETTI_COLORS = ['#FF6B2C', '#FFD700', '#FF453A', '#30D158', '#0A84FF', '#BF5AF2', '#FF375F', '#fff'];
+
+function ConfettiCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const particles: {
+      x: number; y: number; vx: number; vy: number;
+      color: string; size: number; rot: number; rotV: number; life: number;
+    }[] = [];
+
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        x: canvas.width / 2,
+        y: canvas.height * 0.4,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -(Math.random() * 12 + 4),
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        size: Math.random() * 7 + 4,
+        rot: Math.random() * Math.PI * 2,
+        rotV: (Math.random() - 0.5) * 0.3,
+        life: 1,
+      });
+    }
+
+    let frame: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      for (const p of particles) {
+        p.vy += 0.35;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.rotV;
+        p.life -= 0.012;
+        if (p.life <= 0) continue;
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.5);
+        ctx.restore();
+      }
+      if (alive) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 60 }}
+    />
+  );
+}
+
+// ── Success overlay ───────────────────────────────────────────────
+
+function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void }) {
+  const router = useRouter();
+  const [checkVisible, setCheckVisible] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+
+  useEffect(() => {
+    // Save to sessionStorage as a chosen zespot
+    const zespot = {
+      id: place.place_id,
+      name: place.name,
+      address: place.address,
+      rating: place.rating,
+      photo_reference: place.photo_reference || place.photo_references?.[0],
+      chosenAt: new Date().toISOString(),
+    };
+    const existing: typeof zespot[] = JSON.parse(sessionStorage.getItem('chosenZespots') || '[]');
+    const filtered = existing.filter((z) => z.id !== zespot.id);
+    sessionStorage.setItem('chosenZespots', JSON.stringify([zespot, ...filtered].slice(0, 20)));
+
+    const t1 = setTimeout(() => setCheckVisible(true), 100);
+    const t2 = setTimeout(() => setContentVisible(true), 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [place]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0A0A]"
+      style={{ maxWidth: 430, margin: '0 auto' }}>
+
+      <ConfettiCanvas />
+
+      {/* Big checkmark */}
+      <div
+        style={{
+          opacity: checkVisible ? 1 : 0,
+          transform: checkVisible ? 'scale(1)' : 'scale(0.3)',
+          transition: 'opacity 0.5s cubic-bezier(0.34,1.56,0.64,1), transform 0.5s cubic-bezier(0.34,1.56,0.64,1)',
+        }}
+        className="w-[100px] h-[100px] rounded-full bg-[#FF6B2C] flex items-center justify-center shadow-[0_0_60px_rgba(255,107,44,0.6)] mb-6"
+      >
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <path d="M10 24l10 10L38 14" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
+            strokeDasharray="50"
+            strokeDashoffset={checkVisible ? 0 : 50}
+            style={{ transition: 'stroke-dashoffset 0.5s ease 0.3s' }}
+          />
+        </svg>
+      </div>
+
+      {/* Info */}
+      <div
+        className="text-center px-8"
+        style={{
+          opacity: contentVisible ? 1 : 0,
+          transform: contentVisible ? 'translateY(0)' : 'translateY(16px)',
+          transition: 'opacity 0.4s ease, transform 0.4s ease',
+        }}
+      >
+        <p className="text-[13px] text-[#FF6B2C] font-semibold tracking-wider uppercase mb-3">Zespot choisi !</p>
+        <h2 className="text-[26px] font-bold tracking-[-1px] mb-2">{place.name}</h2>
+        <p className="text-[13px] text-[#555] mb-10">{place.address}</p>
+
+        <div className="flex flex-col gap-3 w-full max-w-[280px]">
+          <button
+            onClick={() => router.push('/evenements')}
+            className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[16px] transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
+          >
+            Voir dans mes événements →
+          </button>
+          <button
+            onClick={onDone}
+            className="w-full py-3.5 bg-[#1A1A1A] border border-[#2A2A2A] text-[#888] text-[14px] rounded-[16px] transition-all hover:border-[#444] active:scale-[0.98]"
+          >
+            Retour à la liste
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Spot detail bottom sheet ──────────────────────────────────────
 
 function SpotDetailSheet({
-  place, mode, rank, onClose,
+  place, mode, rank, onClose, onChoose,
 }: {
-  place: Place; mode: TransportMode; rank: number; onClose: () => void;
+  place: Place; mode: TransportMode; rank: number; onClose: () => void; onChoose: () => void;
 }) {
   const [activePhoto, setActivePhoto] = useState(0);
   const photos = place.photo_references?.length
@@ -200,7 +353,7 @@ function SpotDetailSheet({
                 🗺 Google Maps
               </a>
               <button
-                onClick={onClose}
+                onClick={onChoose}
                 className="flex-1 py-3.5 bg-[#FF6B2C] rounded-[14px] text-[13px] font-semibold text-white transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
               >
                 ✓ Choisir ce spot
@@ -217,6 +370,7 @@ function SpotDetailSheet({
 
 export default function ResultsScreen({ coords, midpoint, places, mode, onBack }: Props) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [chosenPlace, setChosenPlace] = useState<Place | null>(null);
   // selectedCardId = highlighted card (from map click), without opening the sheet
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -225,7 +379,7 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
   const hasTravelTimes = places.some((p) => p.travelTimes && p.travelTimes.length > 0);
 
   // Called from map marker click → highlight card + scroll it to top of list
-  const handlePlaceSelect = (place: Place) => {
+  const handlePlaceSelect = useCallback((place: Place) => {
     setSelectedCardId(place.place_id);
     setTimeout(() => {
       const el = cardRefs.current.get(place.place_id);
@@ -235,7 +389,7 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
         list.scrollTo({ top: elTop - 8, behavior: 'smooth' });
       }
     }, 50);
-  };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#0A0A0A]">
@@ -307,6 +461,15 @@ export default function ResultsScreen({ coords, midpoint, places, mode, onBack }
           mode={mode}
           rank={places.findIndex((p) => p.place_id === selectedPlace.place_id) + 1}
           onClose={() => setSelectedPlace(null)}
+          onChoose={() => { setChosenPlace(selectedPlace); setSelectedPlace(null); }}
+        />
+      )}
+
+      {/* Success overlay */}
+      {chosenPlace && (
+        <SuccessOverlay
+          place={chosenPlace}
+          onDone={() => setChosenPlace(null)}
         />
       )}
     </div>

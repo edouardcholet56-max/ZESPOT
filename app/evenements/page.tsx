@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SoireeEvent, TransportMode, SpotVibe, SpotFilters } from '@/lib/types';
+import { SoireeEvent, TransportMode, SpotVibe, SpotFilters, ChosenZespot } from '@/lib/types';
 
 type View = 'list' | 'create' | 'join';
 
@@ -50,6 +50,7 @@ function EvenementsInner() {
   // Events list
   const [events, setEvents] = useState<SoireeEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [zespots, setZespots] = useState<ChosenZespot[]>([]);
 
   // Create form
   const [eventName, setEventName] = useState('');
@@ -76,6 +77,10 @@ function EvenementsInner() {
     if (name) setCreatorName(name);
     const addr = sessionStorage.getItem('myAddress') || '';
     if (addr) setCreatorAddress(addr);
+
+    // Load chosen zespots
+    const saved: ChosenZespot[] = JSON.parse(sessionStorage.getItem('chosenZespots') || '[]');
+    setZespots(saved);
 
     const eventIds: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
     if (eventIds.length === 0) return;
@@ -171,6 +176,50 @@ function EvenementsInner() {
             <span className="text-[16px] leading-none">+</span> Nouveau
           </button>
         </div>
+
+        {/* Chosen Zespots */}
+        {zespots.length > 0 && (
+          <div className="mb-7">
+            <p className="text-[11px] text-[#444] uppercase tracking-[1.5px] font-semibold mb-3 px-1">Mes Zespots 🍺 · {zespots.length}</p>
+            <div className="flex flex-col gap-2.5">
+              {zespots.map((z) => (
+                <div
+                  key={z.id}
+                  className="flex items-center gap-3 bg-[#111] border border-[#1E1E1E] rounded-[16px] p-3.5 transition-all hover:border-[#2A2A2A]"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-[52px] h-[52px] rounded-[12px] overflow-hidden flex-shrink-0 bg-[#1A1A1A] flex items-center justify-center">
+                    {z.photo_reference ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`/api/photo?ref=${encodeURIComponent(z.photo_reference)}&w=200`}
+                        alt={z.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-[22px] opacity-40">🍺</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-semibold text-white truncate">{z.name}</p>
+                    <p className="text-[11px] text-[#555] truncate mt-0.5">{z.address}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {z.rating != null && (
+                        <span className="text-[10px] text-[#FFD700] font-semibold">★ {z.rating.toFixed(1)}</span>
+                      )}
+                      <span className="text-[10px] text-[#333]">
+                        {new Date(z.chosenAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-[rgba(255,107,44,0.12)] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[12px]">✓</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Rejoindre pill */}
         <button

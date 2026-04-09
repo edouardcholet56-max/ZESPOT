@@ -63,6 +63,15 @@ export interface SpotFilters {
   lateClosure?: boolean;
 }
 
+export interface ChosenZespot {
+  id: string;            // place_id
+  name: string;
+  address: string;
+  rating?: number;
+  photo_reference?: string;
+  chosenAt: string;      // ISO timestamp
+}
+
 export interface SoireeEvent {
   id: string;
   name: string;
