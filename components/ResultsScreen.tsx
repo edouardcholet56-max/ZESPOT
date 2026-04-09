@@ -91,7 +91,7 @@ function ConfettiCanvas() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 60 }}
+      style={{ zIndex: 10000 }}
     />
   );
 }
@@ -123,8 +123,10 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
   }, [place]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0A0A]"
-      style={{ maxWidth: 430, margin: '0 auto' }}>
+    <div
+      className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] flex flex-col items-center justify-center bg-[#0A0A0A]"
+      style={{ zIndex: 9999 }}
+    >
 
       <ConfettiCanvas />
 
