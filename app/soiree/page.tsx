@@ -120,79 +120,100 @@ export default function SoireePage() {
   // ── Home screen ───────────────────────────────────────────────────
   if (view === 'home') {
     return (
-      <div
-        className="min-h-screen bg-[#0A0A0A] flex flex-col px-6 pb-10"
-        style={{ backgroundImage: 'radial-gradient(ellipse 80% 45% at 50% 0%, rgba(255,107,44,0.10) 0%, transparent 65%)' }}
-      >
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col px-5 pb-10 overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute top-0 left-0 right-0 h-[340px] pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255,107,44,0.13) 0%, transparent 70%)' }} />
+
         {/* Top bar */}
-        <div className="flex items-start justify-between pt-14 mb-10">
+        <div className="flex items-center justify-between pt-14 mb-8 relative">
           <div>
-            <p className="text-[13px] text-[#555] mb-1">
+            <p className="text-[12px] text-[#555] mb-0.5 tracking-wide">
               {userName ? `Salut ${userName} 👋` : 'Bienvenue 👋'}
             </p>
-            <h1 className="text-[34px] font-bold tracking-[-1.5px] leading-tight">
-              Crée ton<br />
-              <span className="text-[#FF6B2C]">ZESP<span className="text-white">0</span>T</span>
+            <h1 className="text-[32px] font-bold tracking-[-1.5px] leading-[1.1]">
+              ZESP<span className="text-[#FF6B2C]">0</span>T
             </h1>
           </div>
-          {/* Mini nav icons */}
-          <div className="flex items-center gap-2 mt-1">
-            <button
-              onClick={() => router.push('/find')}
-              className="w-10 h-10 bg-[#141414] border border-[#222] rounded-full flex items-center justify-center transition-all hover:border-[#FF6B2C]"
-              title="Trouver un Spot"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-              </svg>
-            </button>
+          <div className="flex gap-2">
             <button
               onClick={() => router.push('/profile')}
-              className="w-10 h-10 bg-[#141414] border border-[#222] rounded-full flex items-center justify-center transition-all hover:border-[#FF6B2C]"
-              title="Profil"
+              className="w-9 h-9 bg-[#141414] border border-[#222] rounded-full flex items-center justify-center transition-all hover:border-[#FF6B2C] active:scale-90"
             >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
               </svg>
             </button>
           </div>
         </div>
 
-        {/* Card 1 — Créer un Zespot → /find */}
+        {/* ── Card 1: Créer un Zespot (hero) ── */}
         <button
           onClick={() => router.push('/find')}
-          className="w-full rounded-[20px] p-5 mb-3 text-left transition-all active:scale-[0.98]"
+          className="w-full rounded-[22px] overflow-hidden mb-3 text-left transition-all active:scale-[0.97] relative"
           style={{
-            background: 'linear-gradient(135deg, #FF6B2C 0%, #ff9a5c 100%)',
-            boxShadow: '0 12px 40px rgba(255,107,44,0.30)',
+            background: 'linear-gradient(145deg, #FF6B2C 0%, #e8551f 60%, #c94010 100%)',
+            boxShadow: '0 16px 48px rgba(255,107,44,0.35)',
           }}
         >
-          <div className="text-[36px] mb-3">📍</div>
-          <p className="text-white text-[11px] font-semibold uppercase tracking-[1.5px] mb-1 opacity-80">Spot</p>
-          <h2 className="text-white text-[22px] font-bold tracking-[-0.5px]">Créer un Zespot</h2>
-          <p className="text-white/70 text-[13px] mt-1">Trouve le bar idéal pour tout le groupe.</p>
+          {/* Decorative circles */}
+          <div className="absolute top-[-30px] right-[-30px] w-[140px] h-[140px] rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute bottom-[-40px] right-[20px] w-[100px] h-[100px] rounded-full bg-white/5 pointer-events-none" />
+
+          <div className="px-6 py-6 relative">
+            <div className="flex items-center justify-between mb-5">
+              <div className="w-12 h-12 bg-white/15 rounded-[14px] flex items-center justify-center text-[24px]">
+                🍺
+              </div>
+              <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+            <p className="text-white/70 text-[11px] font-semibold uppercase tracking-[2px] mb-1">Spot</p>
+            <h2 className="text-white text-[24px] font-bold tracking-[-0.5px]">Créer un Zespot</h2>
+            <p className="text-white/60 text-[13px] mt-1.5">Trouve le bar idéal pour tout le groupe en quelques secondes.</p>
+          </div>
         </button>
 
-        {/* Card 2 — Rejoindre un Zespot → /evenements?view=join */}
-        <button
-          onClick={() => router.push('/evenements?view=join')}
-          className="w-full rounded-[20px] p-5 mb-3 text-left bg-[#141414] border border-[#2A2A2A] transition-all active:scale-[0.98] hover:border-[#3A3A3A]"
-        >
-          <div className="text-[36px] mb-3">🔗</div>
-          <p className="text-[#888] text-[11px] font-semibold uppercase tracking-[1.5px] mb-1">Invité</p>
-          <h2 className="text-white text-[22px] font-bold tracking-[-0.5px]">Rejoindre un Zespot</h2>
-          <p className="text-[#555] text-[13px] mt-1">Entre le code partagé par l&apos;organisateur.</p>
-        </button>
+        {/* ── Cards 2 & 3 (side by side) ── */}
+        <div className="flex gap-3 mb-3">
+          {/* Rejoindre */}
+          <button
+            onClick={() => router.push('/evenements?view=join')}
+            className="flex-1 rounded-[18px] p-4 text-left bg-[#131313] border border-[#1E1E1E] transition-all active:scale-[0.96] hover:border-[#2A2A2A] hover:bg-[#161616]"
+          >
+            <div className="w-10 h-10 bg-[#1E1E1E] rounded-[12px] flex items-center justify-center text-[18px] mb-4">
+              🔗
+            </div>
+            <p className="text-[#555] text-[10px] font-semibold uppercase tracking-[1.5px] mb-0.5">Invité</p>
+            <h3 className="text-white text-[15px] font-bold leading-snug">Rejoindre un Zespot</h3>
+          </button>
 
-        {/* Card 3 — Créer un événement → /evenements?view=create */}
+          {/* Créer un événement */}
+          <button
+            onClick={() => router.push('/evenements?view=create')}
+            className="flex-1 rounded-[18px] p-4 text-left bg-[#131313] border border-[#1E1E1E] transition-all active:scale-[0.96] hover:border-[#2A2A2A] hover:bg-[#161616]"
+          >
+            <div className="w-10 h-10 bg-[#1E1E1E] rounded-[12px] flex items-center justify-center text-[18px] mb-4">
+              🎉
+            </div>
+            <p className="text-[#555] text-[10px] font-semibold uppercase tracking-[1.5px] mb-0.5">Événement</p>
+            <h3 className="text-white text-[15px] font-bold leading-snug">Créer un événement</h3>
+          </button>
+        </div>
+
+        {/* ── Quick access to events ── */}
         <button
-          onClick={() => router.push('/evenements?view=create')}
-          className="w-full rounded-[20px] p-5 text-left bg-[#141414] border border-[#2A2A2A] transition-all active:scale-[0.98] hover:border-[#3A3A3A]"
+          onClick={() => router.push('/evenements')}
+          className="w-full flex items-center gap-3 px-4 py-3.5 bg-transparent border border-[#1A1A1A] rounded-[14px] text-left transition-all hover:border-[#252525] active:scale-[0.98]"
         >
-          <div className="text-[36px] mb-3">🎉</div>
-          <p className="text-[#888] text-[11px] font-semibold uppercase tracking-[1.5px] mb-1">Événement</p>
-          <h2 className="text-white text-[22px] font-bold tracking-[-0.5px]">Créer un événement</h2>
-          <p className="text-[#555] text-[13px] mt-1">Date, invités, description — tout organiser.</p>
+          <span className="text-[18px]">📅</span>
+          <p className="flex-1 text-[13px] text-[#444]">Voir mes événements</p>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#333" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
         </button>
       </div>
     );
