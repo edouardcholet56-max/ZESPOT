@@ -5,6 +5,7 @@ import HomeScreen from '@/components/HomeScreen';
 import LoadingScreen from '@/components/LoadingScreen';
 import ResultsScreen from '@/components/ResultsScreen';
 import { AddressItem, Place, LatLng, TransportMode } from '@/lib/types';
+import { storage } from '@/lib/storage';
 import { getMidpoint, haversine, uid, sleep } from '@/lib/utils';
 
 type Screen = 'home' | 'loading' | 'results';
@@ -25,7 +26,7 @@ export default function FindPage() {
 
   // Pre-fill first address from geolocation set during onboarding
   useEffect(() => {
-    const saved = sessionStorage.getItem('myAddress');
+    const saved = storage.myAddress;
     if (saved) {
       setAddresses((prev) => {
         const updated = [...prev];

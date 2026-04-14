@@ -17,6 +17,8 @@ export interface Place {
   price_level?: number;
   open_now?: boolean;
   dist: number;
+  photo_reference?: string;
+  photo_references?: string[];     // up to 3 photos
   travelTimes?: (number | null)[]; // seconds per participant, null if unavailable
 }
 
@@ -35,4 +37,50 @@ export interface Session {
   mode: TransportMode;
   participants: SessionParticipant[];
   createdAt: number;
+}
+
+export interface EventParticipant {
+  id: string;
+  name: string;
+  address?: string;
+  joinedAt: number;
+}
+
+export type SpotVibe =
+  | 'darts'
+  | 'billiard'
+  | 'sports'
+  | 'cocktails'
+  | 'live'
+  | 'terrace'
+  | 'games'
+  | 'rooftop';
+
+export interface SpotFilters {
+  vibes: SpotVibe[];
+  price?: 1 | 2 | 3;    // 1=€  2=€€  3=€€€
+  openNow?: boolean;
+  lateClosure?: boolean;
+}
+
+export interface ChosenZespot {
+  id: string;            // place_id
+  name: string;
+  address: string;
+  rating?: number;
+  photo_reference?: string;
+  chosenAt: string;      // ISO timestamp
+}
+
+export interface SoireeEvent {
+  id: string;
+  name: string;
+  date: string;       // "2026-04-20"
+  time?: string;      // "20:00"
+  description?: string;
+  createdBy: string;
+  createdAt: number;
+  participants: EventParticipant[];
+  mode: TransportMode;
+  filters?: SpotFilters;
 }

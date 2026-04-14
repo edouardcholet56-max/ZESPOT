@@ -6,7 +6,11 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      padding: {
+        safe: 'env(safe-area-inset-bottom, 0px)',
+      },
+    },
   },
   plugins: [],
 };
