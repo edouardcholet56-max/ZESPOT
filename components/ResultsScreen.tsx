@@ -103,6 +103,9 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
   const router = useRouter();
   const [checkVisible, setCheckVisible] = useState(false);
   const [contentVisible, setContentVisible] = useState(false);
+  const [time, setTime] = useState('');
+  const [copied, setCopied] = useState(false);
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
   useEffect(() => {
     // Save to localStorage as a chosen zespot
@@ -123,58 +126,102 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [place]);
 
+  const handleShare = async () => {
+    const timeStr = time ? ` · ${time}` : '';
+    const text = `${place.name}${timeStr}\n📍 ${place.address}`;
+    if (canShare) {
+      try { await navigator.share({ title: `ZESP0T — ${place.name}`, text }); } catch { /* cancelled */ }
+    } else {
+      try { await navigator.clipboard.writeText(text); } catch { /* fallback */ }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
   return (
     <div
-      className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] flex flex-col items-center justify-center bg-[#0A0A0A]"
+      className="fixed inset-0 flex items-center justify-center"
       style={{ zIndex: 9999 }}
     >
+      {/* Background */}
+      <div className="absolute inset-0 bg-[#0A0A0A]" />
 
       <ConfettiCanvas />
 
-      {/* Big checkmark */}
-      <div
-        style={{
-          opacity: checkVisible ? 1 : 0,
-          transform: checkVisible ? 'scale(1)' : 'scale(0.3)',
-          transition: 'opacity 0.5s cubic-bezier(0.34,1.56,0.64,1), transform 0.5s cubic-bezier(0.34,1.56,0.64,1)',
-        }}
-        className="w-[100px] h-[100px] rounded-full bg-[#FF6B2C] flex items-center justify-center shadow-[0_0_60px_rgba(255,107,44,0.6)] mb-6"
-      >
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <path d="M10 24l10 10L38 14" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
-            strokeDasharray="50"
-            strokeDashoffset={checkVisible ? 0 : 50}
-            style={{ transition: 'stroke-dashoffset 0.5s ease 0.3s' }}
-          />
-        </svg>
-      </div>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-[430px] px-8 mx-auto">
 
-      {/* Info */}
-      <div
-        className="text-center px-8"
-        style={{
-          opacity: contentVisible ? 1 : 0,
-          transform: contentVisible ? 'translateY(0)' : 'translateY(16px)',
-          transition: 'opacity 0.4s ease, transform 0.4s ease',
-        }}
-      >
-        <p className="text-[13px] text-[#FF6B2C] font-semibold tracking-wider uppercase mb-3">Zespot choisi !</p>
-        <h2 className="text-[26px] font-bold tracking-[-1px] mb-2">{place.name}</h2>
-        <p className="text-[13px] text-[#555] mb-10">{place.address}</p>
+        {/* Big checkmark */}
+        <div
+          style={{
+            opacity: checkVisible ? 1 : 0,
+            transform: checkVisible ? 'scale(1)' : 'scale(0.3)',
+            transition: 'opacity 0.5s cubic-bezier(0.34,1.56,0.64,1), transform 0.5s cubic-bezier(0.34,1.56,0.64,1)',
+          }}
+          className="w-[100px] h-[100px] rounded-full bg-[#FF6B2C] flex items-center justify-center shadow-[0_0_60px_rgba(255,107,44,0.6)] mb-6"
+        >
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M10 24l10 10L38 14" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray="50"
+              strokeDashoffset={checkVisible ? 0 : 50}
+              style={{ transition: 'stroke-dashoffset 0.5s ease 0.3s' }}
+            />
+          </svg>
+        </div>
 
-        <div className="flex flex-col gap-3 w-full max-w-[280px]">
-          <button
-            onClick={() => router.push('/evenements')}
-            className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[16px] transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
-          >
-            Voir dans mes événements →
-          </button>
-          <button
-            onClick={onDone}
-            className="w-full py-3.5 bg-[#1A1A1A] border border-[#2A2A2A] text-[#888] text-[14px] rounded-[16px] transition-all hover:border-[#444] active:scale-[0.98]"
-          >
-            Retour à la liste
-          </button>
+        {/* Info + actions */}
+        <div
+          className="text-center w-full"
+          style={{
+            opacity: contentVisible ? 1 : 0,
+            transform: contentVisible ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.4s ease, transform 0.4s ease',
+          }}
+        >
+          <p className="text-[12px] text-[#FF6B2C] font-semibold tracking-[2px] uppercase mb-2">Zespot choisi !</p>
+          <h2 className="text-[24px] font-bold tracking-[-0.5px] leading-tight mb-1">{place.name}</h2>
+          <p className="text-[12px] text-[#555] mb-6">{place.address}</p>
+
+          {/* Time picker */}
+          <div className="flex items-center gap-3 bg-[#141414] border border-[#2A2A2A] rounded-[14px] px-4 py-3 mb-5 text-left">
+            <span className="text-[20px] flex-shrink-0">🕐</span>
+            <div className="flex-1">
+              <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-0.5">Heure du rendez-vous</p>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                placeholder="--:--"
+                className="bg-transparent text-white text-[15px] font-semibold outline-none w-full placeholder-[#444]"
+                style={{ colorScheme: 'dark' }}
+              />
+            </div>
+            {time && (
+              <button onClick={() => setTime('')} className="text-[#444] text-[18px] flex-shrink-0 hover:text-[#888]">×</button>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-2.5 w-full">
+            <button
+              onClick={handleShare}
+              className="w-full py-4 bg-[#FF6B2C] text-white text-[14px] font-semibold rounded-[14px] transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
+            >
+              {copied ? '✓ Copié !' : canShare ? '↗ Partager avec des amis' : '📋 Copier le lieu'}
+            </button>
+            <button
+              onClick={() => router.push('/evenements?view=create')}
+              className="w-full py-3.5 bg-[#141414] border border-[#2A2A2A] text-white text-[14px] font-semibold rounded-[14px] transition-all hover:border-[#3A3A3A] active:scale-[0.98]"
+            >
+              🎉 Créer un événement
+            </button>
+            <button
+              onClick={onDone}
+              className="w-full py-2.5 text-[#444] text-[13px] transition-all hover:text-[#888]"
+            >
+              Retour à la liste
+            </button>
+          </div>
         </div>
       </div>
     </div>
