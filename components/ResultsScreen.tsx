@@ -213,29 +213,17 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
             <span className="text-[18px] flex-shrink-0">🕐</span>
             <div className="flex-1">
               <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-1">Heure du RDV</p>
-              {time ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-[18px] font-bold text-white">{time}</span>
-                  <button
-                    onClick={() => handleTimeChange('')}
-                    className="text-[#555] text-[12px] hover:text-[#888] transition-colors"
-                  >
-                    modifier
-                  </button>
-                </div>
-              ) : (
-                <label className="cursor-pointer">
-                  <span className="text-[13px] text-[#555]">Appuie pour ajouter →</span>
-                  <input
-                    type="time"
-                    value={time}
-                    onChange={(e) => handleTimeChange(e.target.value)}
-                    className="absolute opacity-0 w-0 h-0"
-                    style={{ colorScheme: 'dark' }}
-                  />
-                </label>
-              )}
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => handleTimeChange(e.target.value)}
+                className="bg-transparent text-white text-[16px] font-bold outline-none w-full"
+                style={{ colorScheme: 'dark', minWidth: 0 }}
+              />
             </div>
+            {time && (
+              <button onClick={() => handleTimeChange('')} className="text-[#444] text-[20px] leading-none hover:text-[#888] transition-colors flex-shrink-0">×</button>
+            )}
           </div>
 
           {/* Share code */}
