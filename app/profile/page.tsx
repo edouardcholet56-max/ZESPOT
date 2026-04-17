@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransportMode, SoireeEvent } from '@/lib/types';
+import { storage } from '@/lib/storage';
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -176,14 +177,12 @@ export default function ProfilePage() {
   const [showTransport, setShowTransport] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
-  // Load data from sessionStorage
   useEffect(() => {
-    setName(sessionStorage.getItem('userName') || '');
-    setEmail(sessionStorage.getItem('userEmail') || '');
-    setTransport((sessionStorage.getItem('defaultTransport') as TransportMode) || 'transit');
+    setName(storage.userName);
+    setEmail(storage.userEmail);
+    setTransport(storage.lastMode as TransportMode || 'transit');
 
-    // Load events user participated in
-    const eventIds: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
+    const eventIds = storage.myEventIds;
     if (eventIds.length === 0) return;
 
     setLoadingEvents(true);
@@ -205,26 +204,21 @@ export default function ProfilePage() {
   }, []);
 
   const handleSaveProfile = (n: string, e: string) => {
-    sessionStorage.setItem('userName', n);
-    sessionStorage.setItem('userEmail', e);
+    storage.userName = n;
+    storage.userEmail = e;
     setName(n);
     setEmail(e);
     setShowEdit(false);
   };
 
   const handleSaveTransport = (m: TransportMode) => {
-    sessionStorage.setItem('defaultTransport', m);
+    storage.lastMode = m;
     setTransport(m);
     setShowTransport(false);
   };
 
   const handleLogout = () => {
-    // Keep event participation data, clear identity
-    sessionStorage.removeItem('userName');
-    sessionStorage.removeItem('userEmail');
-    sessionStorage.removeItem('myAddress');
-    sessionStorage.removeItem('myEventIds');
-    sessionStorage.removeItem('defaultTransport');
+    storage.logout();
     router.push('/onboarding');
   };
 

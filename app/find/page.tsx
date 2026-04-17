@@ -5,6 +5,7 @@ import HomeScreen from '@/components/HomeScreen';
 import LoadingScreen from '@/components/LoadingScreen';
 import ResultsScreen from '@/components/ResultsScreen';
 import { AddressItem, Place, LatLng, TransportMode } from '@/lib/types';
+import { storage } from '@/lib/storage';
 import { getMidpoint, haversine, uid, sleep } from '@/lib/utils';
 
 type Screen = 'home' | 'loading' | 'results';
@@ -25,7 +26,7 @@ export default function FindPage() {
 
   // Pre-fill first address from geolocation set during onboarding
   useEffect(() => {
-    const saved = sessionStorage.getItem('myAddress');
+    const saved = storage.myAddress;
     if (saved) {
       setAddresses((prev) => {
         const updated = [...prev];
@@ -56,10 +57,19 @@ export default function FindPage() {
       }
       setCoords(geocoded);
 
-      // ── Step 2: Calculate midpoint ──
+      // ── Step 2: Calculate travel-time equidistant point ──
       setLoadingStep(2);
-      await sleep(300);
-      const mid = getMidpoint(geocoded);
+      let mid: LatLng;
+      try {
+        const originsStr = geocoded.map((c) => `${c.lat},${c.lng}`).join('|');
+        const eqRes = await fetch(
+          `/api/equidistant?origins=${encodeURIComponent(originsStr)}&mode=${mode}`
+        );
+        const eqData = await eqRes.json();
+        mid = eqRes.ok && eqData.lat ? { lat: eqData.lat, lng: eqData.lng } : getMidpoint(geocoded);
+      } catch {
+        mid = getMidpoint(geocoded);
+      }
       setMidpoint(mid);
 
       // ── Step 3: Find nearby bars ──

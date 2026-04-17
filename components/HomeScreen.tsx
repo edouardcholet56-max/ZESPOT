@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AddressItem, TransportMode, Session } from '@/lib/types';
 import { uid } from '@/lib/utils';
+import { storage } from '@/lib/storage';
 
 interface Props {
   addresses: AddressItem[];
@@ -170,19 +171,15 @@ export default function HomeScreen({
   const addedNamesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const name = sessionStorage.getItem('userName') || '';
-    setUserName(name);
-    // Restore last used transport mode
-    const savedMode = sessionStorage.getItem('lastMode') as TransportMode | null;
-    if (savedMode && ['walking', 'bicycling', 'transit'].includes(savedMode)) {
-      setMode(savedMode);
-    }
+    setUserName(storage.userName);
+    const savedMode = storage.lastMode as TransportMode;
+    if (savedMode) setMode(savedMode);
   }, [setMode]);
 
   // Persist mode choice
   const handleMode = (m: TransportMode) => {
     setMode(m);
-    sessionStorage.setItem('lastMode', m);
+    storage.lastMode = m;
   };
 
   // Poll session for new participants
@@ -219,7 +216,7 @@ export default function HomeScreen({
   const createSession = async () => {
     setCreatingSession(true);
     try {
-      const creatorName = sessionStorage.getItem('userName') || 'Moi';
+      const creatorName = storage.userName || 'Moi';
       const res = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

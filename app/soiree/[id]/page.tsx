@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SoireeEvent, Place, LatLng, TransportMode } from '@/lib/types';
+import { storage } from '@/lib/storage';
 import { getMidpoint, haversine, sleep } from '@/lib/utils';
 
 const MODE_ICON: Record<TransportMode, string> = {
@@ -75,13 +76,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     fetchEvent();
     // Restore identity
-    const stored = sessionStorage.getItem(`event_${eventId}_me`);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setMyName(parsed.name);
-        setIsCreator(parsed.isCreator || false);
-      } catch { /* ignore */ }
+    const stored = storage.getEventMeta(eventId) as { name?: string; isCreator?: boolean } | null;
+    if (stored?.name) {
+      setMyName(stored.name);
+      setIsCreator(stored.isCreator || false);
     }
     // Poll every 5s
     const interval = setInterval(fetchEvent, 5000);
@@ -100,10 +98,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      sessionStorage.setItem(`event_${eventId}_me`, JSON.stringify({ name: joinName.trim(), isCreator: false }));
-      // Track in profile
-      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
-      if (!ids.includes(eventId)) sessionStorage.setItem('myEventIds', JSON.stringify([eventId, ...ids]));
+      storage.setEventMeta(eventId, { name: joinName.trim(), isCreator: false });
+      storage.addEventId(eventId);
       setMyName(joinName.trim());
       setEvent(data.event);
       setShowJoin(false);

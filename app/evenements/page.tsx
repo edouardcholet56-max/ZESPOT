@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SoireeEvent, TransportMode, SpotVibe, SpotFilters, ChosenZespot } from '@/lib/types';
+import { storage } from '@/lib/storage';
 
 type View = 'list' | 'create' | 'join';
 
@@ -73,16 +74,13 @@ function EvenementsInner() {
 
   // Load user data + events
   useEffect(() => {
-    const name = sessionStorage.getItem('userName') || '';
-    if (name) setCreatorName(name);
-    const addr = sessionStorage.getItem('myAddress') || '';
-    if (addr) setCreatorAddress(addr);
+    if (storage.userName) setCreatorName(storage.userName);
+    if (storage.myAddress) setCreatorAddress(storage.myAddress);
 
     // Load chosen zespots
-    const saved: ChosenZespot[] = JSON.parse(sessionStorage.getItem('chosenZespots') || '[]');
-    setZespots(saved);
+    setZespots(storage.chosenZespots as ChosenZespot[]);
 
-    const eventIds: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
+    const eventIds = storage.myEventIds;
     if (eventIds.length === 0) return;
 
     setLoadingEvents(true);
@@ -131,9 +129,8 @@ function EvenementsInner() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      sessionStorage.setItem(`event_${data.id}_me`, JSON.stringify({ name: creatorName.trim(), isCreator: true }));
-      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
-      if (!ids.includes(data.id)) sessionStorage.setItem('myEventIds', JSON.stringify([data.id, ...ids]));
+      storage.setEventMeta(data.id, { name: creatorName.trim(), isCreator: true });
+      storage.addEventId(data.id);
       router.push(`/soiree/${data.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de la création.');
@@ -150,8 +147,7 @@ function EvenementsInner() {
     try {
       const res = await fetch(`/api/event?id=${trimmed}`);
       if (!res.ok) { setError("Code invalide — vérifie avec l'organisateur."); setJoining(false); return; }
-      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
-      if (!ids.includes(trimmed)) sessionStorage.setItem('myEventIds', JSON.stringify([trimmed, ...ids]));
+      storage.addEventId(trimmed);
       router.push(`/soiree/${trimmed}`);
     } catch {
       setError('Erreur réseau.');

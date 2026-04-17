@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransportMode, SpotVibe, SpotFilters } from '@/lib/types';
+import { storage } from '@/lib/storage';
 
 type View = 'home' | 'create' | 'join';
 
@@ -55,11 +56,9 @@ export default function SoireePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const name = sessionStorage.getItem('userName') || '';
-    setUserName(name);
-    if (name) setCreatorName(name);
-    const addr = sessionStorage.getItem('myAddress') || '';
-    if (addr) setCreatorAddress(addr);
+    setUserName(storage.userName);
+    if (storage.userName) setCreatorName(storage.userName);
+    if (storage.myAddress) setCreatorAddress(storage.myAddress);
   }, []);
 
   const handleCreate = async () => {
@@ -91,10 +90,8 @@ export default function SoireePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      sessionStorage.setItem(`event_${data.id}_me`, JSON.stringify({ name: creatorName.trim(), isCreator: true }));
-      // Track in profile
-      const ids: string[] = JSON.parse(sessionStorage.getItem('myEventIds') || '[]');
-      if (!ids.includes(data.id)) sessionStorage.setItem('myEventIds', JSON.stringify([data.id, ...ids]));
+      storage.setEventMeta(data.id, { name: creatorName.trim(), isCreator: true });
+      storage.addEventId(data.id);
       router.push(`/soiree/${data.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de la création.');

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Session } from '@/lib/types';
+import { storage } from '@/lib/storage';
 
 const MODE_LABELS: Record<string, string> = {
   walking: '🚶 À pied',
@@ -42,10 +43,8 @@ export default function JoinPage() {
   };
 
   useEffect(() => {
-    const savedName = sessionStorage.getItem('userName');
-    const savedAddress = sessionStorage.getItem('myAddress');
-    if (savedName) setName(savedName);
-    if (savedAddress) setAddress(savedAddress);
+    if (storage.userName) setName(storage.userName);
+    if (storage.myAddress) setAddress(storage.myAddress);
 
     fetchSession();
     const interval = setInterval(fetchSession, 3000);
@@ -66,7 +65,7 @@ export default function JoinPage() {
       if (!res.ok) throw new Error(data.error || 'Erreur');
       setSession(data);
       setJoined(true);
-      sessionStorage.setItem('userName', name.trim());
+      storage.userName = name.trim();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible de rejoindre.');
     } finally {

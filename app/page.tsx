@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { storage } from '@/lib/storage';
 
 export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const name = sessionStorage.getItem('userName');
-    if (name) {
+    if (storage.isLoggedIn) {
       router.replace('/soiree');
     } else {
       router.replace('/onboarding');

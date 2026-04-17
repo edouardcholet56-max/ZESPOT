@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { storage } from '@/lib/storage';
 
 type Step = 'tracking' | 'splash' | 'launch' | 'auth' | 'location';
 
@@ -114,36 +115,34 @@ function TrackingScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
           transition: 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1)',
         }}
       >
-        <div className="relative w-16 h-16 mb-5">
-          <div className="w-14 h-14 bg-[#FF6B2C] rounded-[16px] flex items-center justify-center text-[28px] shadow-[0_4px_20px_rgba(255,107,44,0.4)]">
+        {/* App icon row — identical to iOS ATT layout */}
+        <div className="flex items-center justify-center gap-3 mb-5">
+          <div className="w-[60px] h-[60px] bg-[#FF6B2C] rounded-[14px] flex items-center justify-center text-[30px] shadow-[0_4px_20px_rgba(255,107,44,0.4)]">
             🍺
           </div>
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0A84FF] rounded-full flex items-center justify-center border-2 border-[#1C1C1E]">
-            <span className="text-[13px]">✋</span>
-          </div>
         </div>
 
-        <h2 className="text-white text-[17px] font-semibold leading-snug mb-3">
-          Autoriser « ZESPOT » à suivre votre activité dans les apps et sur les sites web ?
+        <h2 className="text-white text-[17px] font-semibold text-center leading-snug mb-2">
+          Autoriser « ZESPOT » à vous suivre ?
         </h2>
-        <p className="text-[#8E8E93] text-[13px] leading-relaxed mb-6">
-          Cet identifiant sera utilisé pour améliorer votre expérience ZESPOT et vous proposer des suggestions de spots personnalisées.
+        <p className="text-[#8E8E93] text-[13px] text-center leading-relaxed mb-6">
+          Vos données seront utilisées pour vous proposer des publicités personnalisées et mesurer leur efficacité.
         </p>
 
-        <div className="flex flex-col gap-2.5">
-          <button
-            onClick={() => onChoice(false)}
-            className="w-full py-3.5 bg-[#2C2C2E] rounded-[14px] text-[#EBEBF5] text-[15px] transition-opacity hover:opacity-80 active:opacity-60"
-          >
-            Demander à l&apos;app de ne pas me suivre
-          </button>
-          <button
-            onClick={() => onChoice(true)}
-            className="w-full py-3.5 bg-[#2C2C2E] rounded-[14px] text-white text-[15px] font-semibold transition-opacity hover:opacity-80 active:opacity-60"
-          >
-            Autoriser
-          </button>
-        </div>
+        {/* iOS-style divider + stacked buttons */}
+        <div className="border-t border-[#3A3A3C]" />
+        <button
+          onClick={() => onChoice(false)}
+          className="w-full py-[15px] text-[#0A84FF] text-[17px] text-center border-b border-[#3A3A3C] transition-colors active:bg-[#2C2C2E]"
+        >
+          Demander à l&apos;app de ne pas me suivre
+        </button>
+        <button
+          onClick={() => onChoice(true)}
+          className="w-full py-[15px] text-[#0A84FF] text-[17px] font-semibold text-center transition-colors active:bg-[#2C2C2E]"
+        >
+          Autoriser
+        </button>
       </div>
     </div>
   );
@@ -581,40 +580,44 @@ function LocationScreen({ onChoice }: { onChoice: (allow: boolean) => void }) {
       {/* Page label */}
       <p className="text-[12px] text-[#444] uppercase tracking-[1.5px] mb-8">Autorisation</p>
 
-      {/* iOS-style popup */}
+      {/* iOS-style location popup */}
       <div
-        className="w-full max-w-[310px] bg-[#1C1C1E] rounded-[20px] overflow-hidden shadow-2xl"
+        className="w-full max-w-[270px] bg-[#1C1C1E] rounded-[14px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
         style={{
           opacity: visible ? 1 : 0,
-          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(20px)',
-          transition: 'opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1)',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(16px)',
+          transition: 'opacity 0.35s ease, transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)',
         }}
       >
-        <div className="px-5 pt-6 pb-5 text-center">
-          <div className="w-[52px] h-[52px] bg-[#FF6B2C] rounded-[14px] flex items-center justify-center text-[26px] mx-auto mb-4 shadow-[0_4px_16px_rgba(255,107,44,0.35)]">
-            📍
-          </div>
+        <div className="px-4 pt-5 pb-4 text-center">
           <h2 className="text-white text-[17px] font-semibold mb-2 leading-snug">
-            Autoriser « ZESPOT » à utiliser votre position ?
+            Autoriser « ZESPOT » à accéder à votre position ?
           </h2>
-          <p className="text-[#8E8E93] text-[13px] leading-relaxed">
-            Votre position permet de calculer le point de rencontre idéal entre vous et vos amis.
+          <p className="text-[#8E8E93] text-[13px] leading-[1.5]">
+            Votre position sert à calculer le point de rencontre idéal entre tous les participants.
           </p>
         </div>
 
         <div className="h-px bg-[#3A3A3C]" />
 
+        {/* 3 options stacked — exact iOS layout */}
         <button
-          onClick={() => onChoice(false)}
-          className="w-full py-[14px] text-[#FF453A] text-[17px] text-center border-b border-[#3A3A3C] transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
+          onClick={() => onChoice(true)}
+          className="w-full py-[14px] text-[#0A84FF] text-[17px] font-semibold text-center border-b border-[#3A3A3C] transition-colors active:bg-[#2C2C2E]"
         >
-          Ne pas autoriser
+          Autoriser une fois
         </button>
         <button
           onClick={() => onChoice(true)}
-          className="w-full py-[14px] text-[#0A84FF] text-[17px] font-semibold text-center transition-colors hover:bg-[#2C2C2E] active:bg-[#3A3A3C]"
+          className="w-full py-[14px] text-[#0A84FF] text-[17px] text-center border-b border-[#3A3A3C] transition-colors active:bg-[#2C2C2E]"
         >
           Autoriser lors de l&apos;utilisation
+        </button>
+        <button
+          onClick={() => onChoice(false)}
+          className="w-full py-[14px] text-[#0A84FF] text-[17px] text-center transition-colors active:bg-[#2C2C2E]"
+        >
+          Ne pas autoriser
         </button>
       </div>
     </div>
@@ -639,8 +642,8 @@ export default function OnboardingPage() {
   const handleTracking = (_allow: boolean) => setStep('splash');
 
   const handleAuth = () => {
-    if (name.trim()) sessionStorage.setItem('userName', name.trim());
-    if (email.trim()) sessionStorage.setItem('userEmail', email.trim());
+    if (name.trim()) storage.userName = name.trim();
+    if (email.trim()) storage.userEmail = email.trim();
     setStep('location');
   };
 
@@ -651,7 +654,7 @@ export default function OnboardingPage() {
           try {
             const res = await fetch(`/api/reverse-geocode?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`);
             const data = await res.json();
-            if (data.address) sessionStorage.setItem('myAddress', data.address);
+            if (data.address) storage.myAddress = data.address;
           } catch { /* ignore */ }
         },
         () => { /* denied */ }
