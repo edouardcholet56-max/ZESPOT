@@ -209,21 +209,33 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
           <p className="text-[11px] text-[#555] mb-5">{place.address}</p>
 
           {/* Time picker */}
-          <div className="flex items-center gap-3 bg-[#141414] border border-[#222] rounded-[14px] px-4 py-3 mb-4 text-left">
+          <div className="flex items-center gap-3 bg-[#141414] border border-[#222] rounded-[14px] px-4 py-3.5 mb-4 text-left">
             <span className="text-[18px] flex-shrink-0">🕐</span>
             <div className="flex-1">
-              <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-0.5">Heure du RDV</p>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => handleTimeChange(e.target.value)}
-                className="bg-transparent text-white text-[14px] font-semibold outline-none w-full"
-                style={{ colorScheme: 'dark' }}
-              />
+              <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-1">Heure du RDV</p>
+              {time ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-[18px] font-bold text-white">{time}</span>
+                  <button
+                    onClick={() => handleTimeChange('')}
+                    className="text-[#555] text-[12px] hover:text-[#888] transition-colors"
+                  >
+                    modifier
+                  </button>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <span className="text-[13px] text-[#555]">Appuie pour ajouter →</span>
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => handleTimeChange(e.target.value)}
+                    className="absolute opacity-0 w-0 h-0"
+                    style={{ colorScheme: 'dark' }}
+                  />
+                </label>
+              )}
             </div>
-            {time && (
-              <button onClick={() => handleTimeChange('')} className="text-[#444] text-[18px] flex-shrink-0 hover:text-[#888]">×</button>
-            )}
           </div>
 
           {/* Share code */}
@@ -260,7 +272,13 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
                 🗺 Maps
               </a>
               <button
-                onClick={() => router.push('/evenements?view=create')}
+                onClick={() => {
+                  const params = new URLSearchParams({ view: 'create' });
+                  params.set('spot', place.name);
+                  params.set('spotAddress', place.address);
+                  if (time) params.set('time', time);
+                  router.push(`/evenements?${params.toString()}`);
+                }}
                 className="flex-1 py-3.5 bg-[#141414] border border-[#222] text-white text-[13px] font-semibold rounded-[14px] transition-all hover:border-[#3A3A3A] active:scale-[0.98]"
               >
                 🎉 Événement

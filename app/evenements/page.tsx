@@ -48,16 +48,21 @@ function EvenementsInner() {
   const initialView = (searchParams.get('view') as View) || 'list';
   const [view, setView] = useState<View>(initialView);
 
+  // Pre-fill from spot params (coming from ResultsScreen)
+  const spotName = searchParams.get('spot') || '';
+  const spotAddress = searchParams.get('spotAddress') || '';
+  const spotTime = searchParams.get('time') || '';
+
   // Events list
   const [events, setEvents] = useState<SoireeEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [zespots, setZespots] = useState<ChosenZespot[]>([]);
 
-  // Create form
-  const [eventName, setEventName] = useState('');
+  // Create form — pre-fill with spot if provided
+  const [eventName, setEventName] = useState(spotName ? `Soirée ${spotName}` : '');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [description, setDescription] = useState('');
+  const [time, setTime] = useState(spotTime);
+  const [description, setDescription] = useState(spotName && spotAddress ? `📍 ${spotName} — ${spotAddress}` : '');
   const [creatorName, setCreatorName] = useState('');
   const [creatorAddress, setCreatorAddress] = useState('');
   const [mode, setMode] = useState<TransportMode>('transit');
@@ -331,6 +336,22 @@ function EvenementsInner() {
         {/* CREATE FORM */}
         {view === 'create' && (
           <div className="flex flex-col gap-4">
+
+            {/* Spot pre-fill banner */}
+            {spotName && (
+              <div className="flex items-center gap-3 bg-[rgba(255,107,44,0.08)] border border-[rgba(255,107,44,0.25)] rounded-[14px] px-4 py-3.5">
+                <span className="text-[22px] flex-shrink-0">🍺</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-[#FF6B2C] uppercase tracking-[1px] mb-0.5">Zespot choisi</p>
+                  <p className="text-[14px] font-semibold text-white truncate">{spotName}</p>
+                  {spotAddress && <p className="text-[11px] text-[#555] truncate">{spotAddress}</p>}
+                </div>
+                {time && (
+                  <span className="text-[15px] font-bold text-[#FF6B2C] flex-shrink-0">{time}</span>
+                )}
+              </div>
+            )}
+
             <input
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
