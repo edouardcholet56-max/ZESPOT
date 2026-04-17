@@ -22,7 +22,7 @@ const MODE_ICON: Record<TransportMode, string> = {
   walking: '🚶', bicycling: '🚲', transit: '🚇',
 };
 const MODE_LABEL: Record<TransportMode, string> = {
-  walking: 'À pied', bicycling: 'Vélo', transit: 'Transit',
+  walking: 'À pied', bicycling: 'Vélo', transit: 'Transports',
 };
 
 function formatTime(seconds: number | null | undefined): string {
