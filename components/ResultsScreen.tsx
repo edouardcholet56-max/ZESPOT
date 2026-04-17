@@ -96,6 +96,100 @@ function ConfettiCanvas() {
   );
 }
 
+// ── Time picker ───────────────────────────────────────────────────
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = ['00', '15', '30', '45'];
+
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [h, setH] = useState(value ? value.split(':')[0] : '20');
+  const [m, setM] = useState(value ? value.split(':')[1] : '00');
+
+  const confirm = (newH: string, newM: string) => {
+    onChange(`${newH}:${newM}`);
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center gap-3 bg-[#141414] border border-[#222] rounded-[14px] px-4 py-3.5 mb-4 text-left transition-all hover:border-[#FF6B2C] active:scale-[0.98]"
+      >
+        <span className="text-[18px] flex-shrink-0">🕐</span>
+        <div className="flex-1">
+          <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-0.5">Heure du RDV</p>
+          {value ? (
+            <p className="text-[20px] font-bold text-white">{value}</p>
+          ) : (
+            <p className="text-[14px] text-[#555]">Appuie pour choisir l&apos;heure</p>
+          )}
+        </div>
+        {value ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onChange(''); }}
+            className="text-[#444] text-[20px] leading-none hover:text-[#888] flex-shrink-0"
+          >×</button>
+        ) : (
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        )}
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-[10001] flex items-end justify-center" onClick={() => setOpen(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            className="relative w-full max-w-[430px] bg-[#1C1C1E] rounded-t-[24px] px-5 pt-4 pb-8"
+            style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.8)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-[#3A3A3C] rounded-full mx-auto mb-5" />
+            <p className="text-[16px] font-bold text-white mb-5 text-center">Choisir l&apos;heure</p>
+
+            <div className="flex gap-4 mb-6">
+              {/* Hours */}
+              <div className="flex-1">
+                <p className="text-[10px] text-[#555] uppercase tracking-[1px] mb-2 text-center">Heure</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {HOURS.map((hh) => (
+                    <button key={hh} onClick={() => setH(hh)}
+                      className={`py-2 rounded-[10px] text-[14px] font-semibold transition-all ${h === hh ? 'bg-[#FF6B2C] text-white' : 'bg-[#2C2C2E] text-[#888] hover:bg-[#3A3A3C]'}`}>
+                      {hh}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Minutes */}
+              <div className="w-[90px]">
+                <p className="text-[10px] text-[#555] uppercase tracking-[1px] mb-2 text-center">Min</p>
+                <div className="flex flex-col gap-1.5">
+                  {MINUTES.map((mm) => (
+                    <button key={mm} onClick={() => setM(mm)}
+                      className={`py-2.5 rounded-[10px] text-[14px] font-semibold transition-all ${m === mm ? 'bg-[#FF6B2C] text-white' : 'bg-[#2C2C2E] text-[#888] hover:bg-[#3A3A3C]'}`}>
+                      :{mm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => confirm(h, m)}
+              className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
+            >
+              Confirmer — {h}:{m}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── Success overlay ───────────────────────────────────────────────
 
 function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void }) {
@@ -209,22 +303,7 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
           <p className="text-[11px] text-[#555] mb-5">{place.address}</p>
 
           {/* Time picker */}
-          <div className="flex items-center gap-3 bg-[#141414] border border-[#222] rounded-[14px] px-4 py-3.5 mb-4 text-left">
-            <span className="text-[18px] flex-shrink-0">🕐</span>
-            <div className="flex-1">
-              <p className="text-[10px] text-[#444] uppercase tracking-[1px] mb-1">Heure du RDV</p>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => handleTimeChange(e.target.value)}
-                className="bg-transparent text-white text-[16px] font-bold outline-none w-full"
-                style={{ colorScheme: 'dark', minWidth: 0 }}
-              />
-            </div>
-            {time && (
-              <button onClick={() => handleTimeChange('')} className="text-[#444] text-[20px] leading-none hover:text-[#888] transition-colors flex-shrink-0">×</button>
-            )}
-          </div>
+          <TimePicker value={time} onChange={handleTimeChange} />
 
           {/* Share code */}
           {code && (
