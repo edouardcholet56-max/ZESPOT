@@ -110,6 +110,20 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
 
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${place.place_id}`;
 
+  // Persist time changes live as the user types
+  const saveTime = useCallback((t: string) => {
+    const existing = storage.chosenZespots as { id: string; meetingTime?: string }[];
+    const updated = existing.map((z) =>
+      z.id === place.place_id ? { ...z, meetingTime: t || undefined } : z
+    );
+    storage.setChosenZespots(updated);
+  }, [place.place_id]);
+
+  const handleTimeChange = (t: string) => {
+    setTime(t);
+    saveTime(t);
+  };
+
   useEffect(() => {
     const zespot = {
       id: place.place_id,
@@ -118,6 +132,7 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
       rating: place.rating,
       photo_reference: place.photo_reference || place.photo_references?.[0],
       chosenAt: new Date().toISOString(),
+      meetingTime: undefined as string | undefined,
     };
     const existing = storage.chosenZespots as typeof zespot[];
     const filtered = existing.filter((z) => z.id !== zespot.id);
@@ -201,13 +216,13 @@ function SuccessOverlay({ place, onDone }: { place: Place; onDone: () => void })
               <input
                 type="time"
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
+                onChange={(e) => handleTimeChange(e.target.value)}
                 className="bg-transparent text-white text-[14px] font-semibold outline-none w-full"
                 style={{ colorScheme: 'dark' }}
               />
             </div>
             {time && (
-              <button onClick={() => setTime('')} className="text-[#444] text-[18px] flex-shrink-0 hover:text-[#888]">×</button>
+              <button onClick={() => handleTimeChange('')} className="text-[#444] text-[18px] flex-shrink-0 hover:text-[#888]">×</button>
             )}
           </div>
 

@@ -70,6 +70,7 @@ export interface ChosenZespot {
   rating?: number;
   photo_reference?: string;
   chosenAt: string;      // ISO timestamp
+  meetingTime?: string;  // "HH:MM" e.g. "20:30"
 }
 
 export interface SoireeEvent {

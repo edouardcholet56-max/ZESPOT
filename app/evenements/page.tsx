@@ -181,35 +181,62 @@ function EvenementsInner() {
               {zespots.map((z) => (
                 <div
                   key={z.id}
-                  className="flex items-center gap-3 bg-[#111] border border-[#1E1E1E] rounded-[16px] p-3.5 transition-all hover:border-[#2A2A2A]"
+                  className="bg-[#111] border border-[#1E1E1E] rounded-[16px] p-3.5 transition-all hover:border-[#2A2A2A]"
                 >
-                  {/* Thumbnail */}
-                  <div className="w-[52px] h-[52px] rounded-[12px] overflow-hidden flex-shrink-0 bg-[#1A1A1A] flex items-center justify-center">
-                    {z.photo_reference ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`/api/photo?ref=${encodeURIComponent(z.photo_reference)}&w=200`}
-                        alt={z.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-[22px] opacity-40">🍺</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold text-white truncate">{z.name}</p>
-                    <p className="text-[11px] text-[#555] truncate mt-0.5">{z.address}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {z.rating != null && (
-                        <span className="text-[10px] text-[#FFD700] font-semibold">★ {z.rating.toFixed(1)}</span>
+                  <div className="flex items-center gap-3">
+                    {/* Thumbnail */}
+                    <div className="w-[52px] h-[52px] rounded-[12px] overflow-hidden flex-shrink-0 bg-[#1A1A1A] flex items-center justify-center">
+                      {z.photo_reference ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`/api/photo?ref=${encodeURIComponent(z.photo_reference)}&w=200`}
+                          alt={z.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[22px] opacity-40">🍺</span>
                       )}
-                      <span className="text-[10px] text-[#333]">
-                        {new Date(z.chosenAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-semibold text-white truncate">{z.name}</p>
+                      <p className="text-[11px] text-[#555] truncate mt-0.5">{z.address}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {z.rating != null && (
+                          <span className="text-[10px] text-[#FFD700] font-semibold">★ {z.rating.toFixed(1)}</span>
+                        )}
+                        <span className="text-[10px] text-[#333]">
+                          {new Date(z.chosenAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-[rgba(255,107,44,0.12)] flex items-center justify-center flex-shrink-0">
+                      <span className="text-[12px]">✓</span>
                     </div>
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-[rgba(255,107,44,0.12)] flex items-center justify-center flex-shrink-0">
-                    <span className="text-[12px]">✓</span>
+
+                  {/* Meeting time row */}
+                  <div className="mt-3 pt-3 border-t border-[#1A1A1A] flex items-center gap-2.5">
+                    <span className="text-[14px] flex-shrink-0">🕐</span>
+                    <div className="flex-1">
+                      <p className="text-[10px] text-[#444] uppercase tracking-[0.8px] mb-0.5">Heure du RDV</p>
+                      <input
+                        type="time"
+                        defaultValue={z.meetingTime || ''}
+                        onChange={(e) => {
+                          const t = e.target.value;
+                          const updated = (storage.chosenZespots as ChosenZespot[]).map((s) =>
+                            s.id === z.id ? { ...s, meetingTime: t || undefined } : s
+                          );
+                          storage.setChosenZespots(updated);
+                          setZespots(updated);
+                        }}
+                        className="bg-transparent text-white text-[14px] font-semibold outline-none w-full placeholder-[#333]"
+                        style={{ colorScheme: 'dark' }}
+                      />
+                    </div>
+                    {z.meetingTime && (
+                      <span className="text-[13px] font-bold text-[#FF6B2C] flex-shrink-0">{z.meetingTime}</span>
+                    )}
                   </div>
                 </div>
               ))}
