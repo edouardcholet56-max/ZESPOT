@@ -57,6 +57,7 @@ function EvenementsInner() {
   const [events, setEvents] = useState<SoireeEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [zespots, setZespots] = useState<ChosenZespot[]>([]);
+  const [editingZespot, setEditingZespot] = useState<ChosenZespot | null>(null);
 
   // Create form — pre-fill with spot if provided
   const [eventName, setEventName] = useState(spotName ? `Soirée ${spotName}` : '');
@@ -184,20 +185,16 @@ function EvenementsInner() {
             <p className="text-[11px] text-[#444] uppercase tracking-[1.5px] font-semibold mb-3 px-1">Mes Zespots 🍺 · {zespots.length}</p>
             <div className="flex flex-col gap-2.5">
               {zespots.map((z) => (
-                <div
+                <button
                   key={z.id}
-                  className="bg-[#111] border border-[#1E1E1E] rounded-[16px] p-3.5 transition-all hover:border-[#2A2A2A]"
+                  onClick={() => setEditingZespot(z)}
+                  className="w-full bg-[#111] border border-[#1E1E1E] rounded-[16px] p-3.5 text-left transition-all hover:border-[#2A2A2A] active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-3">
-                    {/* Thumbnail */}
                     <div className="w-[52px] h-[52px] rounded-[12px] overflow-hidden flex-shrink-0 bg-[#1A1A1A] flex items-center justify-center">
                       {z.photo_reference ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={`/api/photo?ref=${encodeURIComponent(z.photo_reference)}&w=200`}
-                          alt={z.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={`/api/photo?ref=${encodeURIComponent(z.photo_reference)}&w=200`} alt={z.name} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-[22px] opacity-40">🍺</span>
                       )}
@@ -206,47 +203,43 @@ function EvenementsInner() {
                       <p className="text-[14px] font-semibold text-white truncate">{z.name}</p>
                       <p className="text-[11px] text-[#555] truncate mt-0.5">{z.address}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        {z.rating != null && (
-                          <span className="text-[10px] text-[#FFD700] font-semibold">★ {z.rating.toFixed(1)}</span>
-                        )}
-                        <span className="text-[10px] text-[#333]">
-                          {new Date(z.chosenAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                        </span>
+                        {z.rating != null && <span className="text-[10px] text-[#FFD700] font-semibold">★ {z.rating.toFixed(1)}</span>}
+                        <span className="text-[10px] text-[#333]">{new Date(z.chosenAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
                       </div>
                     </div>
-                    <div className="w-7 h-7 rounded-full bg-[rgba(255,107,44,0.12)] flex items-center justify-center flex-shrink-0">
-                      <span className="text-[12px]">✓</span>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      {z.meetingTime ? (
+                        <span className="text-[15px] font-bold text-[#FF6B2C]">{z.meetingTime}</span>
+                      ) : (
+                        <span className="text-[10px] text-[#444] border border-[#2A2A2A] rounded-full px-2 py-0.5">+ heure</span>
+                      )}
+                      <span className="text-[10px] text-[#555]">Modifier →</span>
                     </div>
                   </div>
-
-                  {/* Meeting time row */}
-                  <div className="mt-3 pt-3 border-t border-[#1A1A1A] flex items-center gap-2.5">
-                    <span className="text-[14px] flex-shrink-0">🕐</span>
-                    <div className="flex-1">
-                      <p className="text-[10px] text-[#444] uppercase tracking-[0.8px] mb-0.5">Heure du RDV</p>
-                      <input
-                        type="time"
-                        defaultValue={z.meetingTime || ''}
-                        onChange={(e) => {
-                          const t = e.target.value;
-                          const updated = (storage.chosenZespots as ChosenZespot[]).map((s) =>
-                            s.id === z.id ? { ...s, meetingTime: t || undefined } : s
-                          );
-                          storage.setChosenZespots(updated);
-                          setZespots(updated);
-                        }}
-                        className="bg-transparent text-white text-[14px] font-semibold outline-none w-full placeholder-[#333]"
-                        style={{ colorScheme: 'dark' }}
-                      />
-                    </div>
-                    {z.meetingTime && (
-                      <span className="text-[13px] font-bold text-[#FF6B2C] flex-shrink-0">{z.meetingTime}</span>
-                    )}
-                  </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
+        )}
+
+        {/* Zespot edit sheet */}
+        {editingZespot && (
+          <ZespotEditSheet
+            zespot={editingZespot}
+            onSave={(updated) => {
+              const all = (storage.chosenZespots as ChosenZespot[]).map((z) => z.id === updated.id ? updated : z);
+              storage.setChosenZespots(all);
+              setZespots(all);
+              setEditingZespot(null);
+            }}
+            onDelete={(id) => {
+              const all = (storage.chosenZespots as ChosenZespot[]).filter((z) => z.id !== id);
+              storage.setChosenZespots(all);
+              setZespots(all);
+              setEditingZespot(null);
+            }}
+            onClose={() => setEditingZespot(null)}
+          />
         )}
 
         {/* Rejoindre pill */}
@@ -286,7 +279,16 @@ function EvenementsInner() {
                 <p className="text-[11px] text-[#444] uppercase tracking-[1.5px] font-semibold mb-3 px-1">À venir · {upcoming.length}</p>
                 <div className="flex flex-col gap-3">
                   {upcoming.map((ev) => (
-                    <EventCard key={ev.id} event={ev} onClick={() => router.push(`/soiree/${ev.id}`)} />
+                    <EventCard
+                      key={ev.id}
+                      event={ev}
+                      onClick={() => router.push(`/soiree/${ev.id}`)}
+                      onDelete={() => {
+                        const ids = storage.myEventIds.filter((id) => id !== ev.id);
+                        storage.setEventIds(ids);
+                        setEvents((prev) => prev.filter((e) => e.id !== ev.id));
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -298,7 +300,16 @@ function EvenementsInner() {
                 <p className="text-[11px] text-[#444] uppercase tracking-[1.5px] font-semibold mb-3 px-1">Passés · {past.length}</p>
                 <div className="flex flex-col gap-3 opacity-60">
                   {past.map((ev) => (
-                    <EventCard key={ev.id} event={ev} onClick={() => router.push(`/soiree/${ev.id}`)} />
+                    <EventCard
+                      key={ev.id}
+                      event={ev}
+                      onClick={() => router.push(`/soiree/${ev.id}`)}
+                      onDelete={() => {
+                        const ids = storage.myEventIds.filter((id) => id !== ev.id);
+                        storage.setEventIds(ids);
+                        setEvents((prev) => prev.filter((e) => e.id !== ev.id));
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -471,33 +482,169 @@ function EvenementsInner() {
   );
 }
 
+// ── Zespot edit sheet ─────────────────────────────────────────────
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = ['00', '15', '30', '45'];
+
+function ZespotEditSheet({
+  zespot, onSave, onDelete, onClose,
+}: {
+  zespot: ChosenZespot;
+  onSave: (z: ChosenZespot) => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+}) {
+  const [h, setH] = useState(zespot.meetingTime ? zespot.meetingTime.split(':')[0] : '20');
+  const [m, setM] = useState(zespot.meetingTime ? zespot.meetingTime.split(':')[1] : '00');
+  const [hasTime, setHasTime] = useState(!!zespot.meetingTime);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleSave = () => {
+    onSave({ ...zespot, meetingTime: hasTime ? `${h}:${m}` : undefined });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60" style={{ backdropFilter: 'blur(4px)' }} />
+      <div
+        className="relative w-full max-w-[430px] bg-[#1C1C1E] rounded-t-[24px] px-5 pt-4 pb-10"
+        style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.8)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-[#3A3A3C] rounded-full mx-auto mb-5" />
+
+        {/* Spot info */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-[48px] h-[48px] rounded-[12px] overflow-hidden flex-shrink-0 bg-[#2C2C2E] flex items-center justify-center">
+            {zespot.photo_reference ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/api/photo?ref=${encodeURIComponent(zespot.photo_reference)}&w=200`} alt={zespot.name} className="w-full h-full object-cover" />
+            ) : <span className="text-[20px] opacity-40">🍺</span>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[16px] font-bold text-white truncate">{zespot.name}</p>
+            <p className="text-[11px] text-[#555] truncate">{zespot.address}</p>
+          </div>
+        </div>
+
+        {/* Time toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[14px] font-semibold text-white">🕐 Heure du RDV</p>
+          <button
+            onClick={() => setHasTime(!hasTime)}
+            className={`w-[44px] h-[26px] rounded-full transition-all relative ${hasTime ? 'bg-[#FF6B2C]' : 'bg-[#3A3A3C]'}`}
+          >
+            <span className={`absolute top-[3px] w-[20px] h-[20px] bg-white rounded-full shadow transition-all ${hasTime ? 'left-[21px]' : 'left-[3px]'}`} />
+          </button>
+        </div>
+
+        {hasTime && (
+          <div className="flex gap-4 mb-5">
+            <div className="flex-1">
+              <p className="text-[10px] text-[#555] uppercase tracking-[1px] mb-2 text-center">Heure</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {HOURS.map((hh) => (
+                  <button key={hh} onClick={() => setH(hh)}
+                    className={`py-2 rounded-[10px] text-[13px] font-semibold transition-all ${h === hh ? 'bg-[#FF6B2C] text-white' : 'bg-[#2C2C2E] text-[#888] hover:bg-[#3A3A3C]'}`}>
+                    {hh}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="w-[80px]">
+              <p className="text-[10px] text-[#555] uppercase tracking-[1px] mb-2 text-center">Min</p>
+              <div className="flex flex-col gap-1.5">
+                {MINUTES.map((mm) => (
+                  <button key={mm} onClick={() => setM(mm)}
+                    className={`py-2.5 rounded-[10px] text-[14px] font-semibold transition-all ${m === mm ? 'bg-[#FF6B2C] text-white' : 'bg-[#2C2C2E] text-[#888] hover:bg-[#3A3A3C]'}`}>
+                    :{mm}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleSave}
+          className="w-full py-4 bg-[#FF6B2C] text-white text-[15px] font-semibold rounded-[14px] mb-3 transition-all hover:bg-[#ff7d45] active:scale-[0.98]"
+        >
+          {hasTime ? `Enregistrer — ${h}:${m}` : 'Enregistrer sans heure'}
+        </button>
+
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="w-full py-3 text-[#FF453A] text-[14px] font-medium transition-colors hover:text-red-400"
+          >
+            Supprimer ce Zespot
+          </button>
+        ) : (
+          <div className="flex gap-3">
+            <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 bg-[#2C2C2E] rounded-[12px] text-[13px] text-[#888] font-medium">
+              Annuler
+            </button>
+            <button onClick={() => onDelete(zespot.id)} className="flex-1 py-3 bg-[rgba(255,69,58,0.15)] border border-[rgba(255,69,58,0.3)] rounded-[12px] text-[13px] text-[#FF453A] font-semibold">
+              Confirmer
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Event card ────────────────────────────────────────────────────
 
-function EventCard({ event, onClick }: { event: SoireeEvent; onClick: () => void }) {
+function EventCard({ event, onClick, onDelete }: { event: SoireeEvent; onClick: () => void; onDelete: () => void }) {
   const upcoming = isUpcoming(event.date);
+  const [showActions, setShowActions] = useState(false);
+
   return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3.5 bg-[#111] border border-[#1E1E1E] rounded-[16px] p-4 text-left transition-all hover:border-[#2A2A2A] active:scale-[0.98]"
-    >
-      <div
-        className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[20px] flex-shrink-0"
-        style={{ background: upcoming ? 'rgba(255,107,44,0.12)' : 'rgba(255,255,255,0.04)' }}
+    <div className="relative">
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-3.5 bg-[#111] border border-[#1E1E1E] rounded-[16px] p-4 text-left transition-all hover:border-[#2A2A2A] active:scale-[0.98]"
       >
-        🎉
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-white truncate">{event.name}</p>
-        <p className="text-[11px] text-[#555] mt-0.5">{formatDate(event.date, event.time)}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-[#444]">{event.participants.length} participant{event.participants.length > 1 ? 's' : ''}</span>
-          {upcoming && <span className="text-[10px] text-[#FF6B2C] font-medium bg-[rgba(255,107,44,0.1)] px-1.5 py-0.5 rounded-full">À venir</span>}
+        <div
+          className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[20px] flex-shrink-0"
+          style={{ background: upcoming ? 'rgba(255,107,44,0.12)' : 'rgba(255,255,255,0.04)' }}
+        >
+          🎉
         </div>
-      </div>
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#333" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-[14px] font-semibold text-white truncate">{event.name}</p>
+          <p className="text-[11px] text-[#555] mt-0.5">{formatDate(event.date, event.time)}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[10px] text-[#444]">{event.participants.length} participant{event.participants.length > 1 ? 's' : ''}</span>
+            {upcoming && <span className="text-[10px] text-[#FF6B2C] font-medium bg-[rgba(255,107,44,0.1)] px-1.5 py-0.5 rounded-full">À venir</span>}
+          </div>
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowActions(!showActions); }}
+          className="w-7 h-7 flex items-center justify-center text-[#444] hover:text-[#888] transition-colors flex-shrink-0 text-[18px] pb-1"
+        >
+          ···
+        </button>
+      </button>
+      {showActions && (
+        <div className="mt-1 flex gap-2 px-1">
+          <button
+            onClick={() => { onClick(); setShowActions(false); }}
+            className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-[10px] text-[12px] text-white font-medium"
+          >
+            Voir →
+          </button>
+          <button
+            onClick={() => { onDelete(); setShowActions(false); }}
+            className="flex-1 py-2.5 bg-[rgba(255,69,58,0.12)] border border-[rgba(255,69,58,0.3)] rounded-[10px] text-[12px] text-[#FF453A] font-medium"
+          >
+            Retirer de ma liste
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
