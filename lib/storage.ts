@@ -55,10 +55,29 @@ export const storage = {
     try { return JSON.parse(localStorage.getItem(`event_${id}_me`) || 'null'); } catch { return null; }
   },
 
+  // ── Beta spots (V0) ──────────────────────────────────────────────
+  get betaSpots(): object[] {
+    if (!isBrowser) return [];
+    try { return JSON.parse(localStorage.getItem('betaSpots') || '[]'); } catch { return []; }
+  },
+  addBetaSpot(spot: object) {
+    if (!isBrowser) return;
+    const list = storage.betaSpots;
+    // Dedupe by code if present (last wins)
+    const code = (spot as { code?: string }).code;
+    const filtered = code ? list.filter((s) => (s as { code?: string }).code !== code) : list;
+    localStorage.setItem('betaSpots', JSON.stringify([spot, ...filtered].slice(0, 50)));
+  },
+  removeBetaSpot(code: string) {
+    if (!isBrowser) return;
+    const list = storage.betaSpots.filter((s) => (s as { code?: string }).code !== code);
+    localStorage.setItem('betaSpots', JSON.stringify(list));
+  },
+
   // ── Clear auth (logout) ──────────────────────────────────────────
   logout() {
     if (!isBrowser) return;
-    ['userName', 'userEmail', 'myAddress', 'lastMode', 'myEventIds', 'chosenZespots'].forEach(
+    ['userName', 'userEmail', 'myAddress', 'lastMode', 'myEventIds', 'chosenZespots', 'betaSpots'].forEach(
       (k) => localStorage.removeItem(k)
     );
     // Also clear event metas

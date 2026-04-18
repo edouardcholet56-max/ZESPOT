@@ -11,6 +11,16 @@ const VIBE_KEYWORDS: Record<string, string> = {
   rooftop:   'rooftop',
 };
 
+// Map our friendly "spot types" → Google Places API `type` parameter.
+// These are the official Google Place types → guarantees real results,
+// not approximations (important for the V0 promise).
+const SPOT_TYPE_MAP: Record<string, string> = {
+  bar:        'bar',
+  restaurant: 'restaurant',
+  park:       'park',
+  museum:     'museum',
+};
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const lat = searchParams.get('lat');
@@ -19,6 +29,7 @@ export async function GET(request: NextRequest) {
   const vibesParam = searchParams.get('vibes') || '';       // comma-separated
   const maxprice = searchParams.get('maxprice') || '';
   const opennow = searchParams.get('opennow') === 'true';
+  const spotType = (searchParams.get('type') || 'bar').toLowerCase();
 
   if (!lat || !lng) {
     return NextResponse.json({ error: 'lat and lng required' }, { status: 400 });
@@ -29,15 +40,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
   }
 
+  // Resolve to a valid Google Places type
+  const googleType = SPOT_TYPE_MAP[spotType] || 'bar';
+
   try {
-    // Build keyword from vibes
+    // Build keyword from vibes (only meaningful for bars right now)
     const vibes = vibesParam ? vibesParam.split(',').filter(Boolean) : [];
     const keyword = vibes.map((v) => VIBE_KEYWORDS[v] || v).join(' ').trim();
 
     let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json`
       + `?location=${lat},${lng}`
       + `&radius=${radius}`
-      + `&type=bar`
+      + `&type=${googleType}`
       + `&key=${key}`
       + `&language=fr`;
 
@@ -70,7 +84,7 @@ export async function GET(request: NextRequest) {
       photo_references: (p.photos || []).slice(0, 3).map((ph: { photo_reference: string }) => ph.photo_reference).filter(Boolean),
     }));
 
-    return NextResponse.json({ places });
+    return NextResponse.json({ places, type: spotType });
   } catch {
     return NextResponse.json({ error: 'Places search failed' }, { status: 500 });
   }
