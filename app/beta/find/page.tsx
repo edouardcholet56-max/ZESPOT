@@ -1007,6 +1007,12 @@ function ResultStep({
           >
             Créer un autre Zespot
           </button>
+          <Link
+            href="/beta/mes-spots"
+            className="w-full py-3.5 bg-white border-2 border-[#10D29B] text-[#10D29B] text-[14px] font-bold rounded-[18px] text-center transition-all active:scale-[0.98] block hover:bg-[#D6F9EC]"
+          >
+            Voir tous mes spots →
+          </Link>
           <button
             onClick={onHome}
             className="w-full py-3 text-[#9A8FA3] text-[13px] font-semibold hover:text-[#6B6275] transition-colors"

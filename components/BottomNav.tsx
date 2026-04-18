@@ -38,7 +38,7 @@ const TABS = [
 // exact paths to hide nav
 const HIDDEN_EXACT = ['/', '/soiree'];
 // prefix paths to hide nav
-const HIDDEN_PREFIX = ['/onboarding', '/join'];
+const HIDDEN_PREFIX = ['/onboarding', '/join', '/beta', '/spot'];
 
 export default function BottomNav() {
   const pathname = usePathname();

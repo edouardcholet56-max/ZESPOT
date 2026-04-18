@@ -1,21 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 export default function BetaHomePage() {
-  const [spotCount, setSpotCount] = useState(0);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('betaSpots');
-      const list = raw ? JSON.parse(raw) : [];
-      setSpotCount(Array.isArray(list) ? list.length : 0);
-    } catch {
-      setSpotCount(0);
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-[#FFF5F7] text-[#1F1B2E] flex flex-col items-center justify-between px-6 py-12 overflow-hidden relative">
       {/* Soft decorative blobs */}
@@ -60,14 +47,6 @@ export default function BetaHomePage() {
         >
           ✨ Créer mon Zespot
         </Link>
-        {spotCount > 0 && (
-          <Link
-            href="/beta/mes-spots"
-            className="w-full py-3.5 bg-white hover:bg-[#F8FBF9] active:scale-[0.98] border-2 border-[#10D29B] text-[#10D29B] text-[15px] font-semibold rounded-[18px] text-center transition-all"
-          >
-            Mes spots <span className="ml-1 opacity-70">· {spotCount}</span>
-          </Link>
-        )}
 
         <p className="text-center text-[11px] text-[#9A8FA3] mt-3 tracking-[0.5px]">
           Merci de tester Zespot 💚 ton feedback compte.
