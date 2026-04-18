@@ -75,29 +75,28 @@ export default function BetaMap({
       });
       L.marker([midpoint.lat, midpoint.lng], { icon: midIcon }).addTo(map);
 
-      // ── Spot markers ──
+      // ── Spot markers (small dots, optional label on selected) ──
       places.forEach((p) => {
         const isSelected = p.place_id === selectedPlaceId;
         const isTop = (p.rating ?? 0) >= 4;
 
-        const bg = isSelected ? '#FF4D8F' : '#fff';
-        const color = isSelected ? '#fff' : '#1F1B2E';
-        const border = isTop ? '#F5B800' : isSelected ? '#FF4D8F' : '#F0E5EA';
-        const borderWidth = isTop ? 3 : 2;
-        const scale = isSelected ? 1.12 : 1;
+        const dotBg = isSelected ? '#FF4D8F' : '#fff';
+        const dotBorder = isTop ? '#F5B800' : isSelected ? '#FF4D8F' : '#B8A9B3';
+        const dotSize = isSelected ? 14 : 10;
+        const borderWidth = isTop ? 2.5 : 2;
 
-        const ratingHtml =
-          p.rating != null
-            ? `<span style="font-size:10px;font-weight:800;margin-left:3px;">${isTop ? '⭐' : '★'}${p.rating.toFixed(1)}</span>`
-            : '';
+        const label = isSelected
+          ? `<div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:#FF4D8F;color:#fff;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 4px 12px rgba(255,77,143,0.35);max-width:140px;overflow:hidden;text-overflow:ellipsis;">${p.name.length > 16 ? p.name.slice(0, 14) + '…' : p.name}</div>`
+          : '';
 
         const icon = L.divIcon({
           className: '',
-          html: `<div style="background:${bg};color:${color};border:${borderWidth}px solid ${border};border-radius:14px;padding:5px 9px;display:inline-flex;align-items:center;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,${isSelected ? 0.22 : 0.1});transform:scale(${scale});transition:all 0.2s;cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;">
-            ${p.name.length > 16 ? p.name.slice(0, 14) + '…' : p.name}${ratingHtml}
+          html: `<div style="position:relative;">
+            ${label}
+            <div style="width:${dotSize}px;height:${dotSize}px;background:${dotBg};border:${borderWidth}px solid ${dotBorder};border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,${isSelected ? 0.2 : 0.12});cursor:pointer;transition:all 0.15s;"></div>
           </div>`,
-          iconSize: [0, 0],
-          iconAnchor: [0, 0],
+          iconSize: [dotSize, dotSize],
+          iconAnchor: [dotSize / 2, dotSize / 2],
         });
         const marker = L.marker([p.lat, p.lng], { icon }).addTo(map);
         marker.on('click', () => onPlaceSelect?.(p));
