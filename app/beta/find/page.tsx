@@ -701,9 +701,12 @@ function ChooseStep({
   const selected = places.find((p) => p.place_id === selectedId) || null;
 
   return (
-    <div className="min-h-screen bg-[#FFF5F7] text-[#1F1B2E] flex flex-col">
-      {/* Top bar over map */}
-      <header className="relative z-20 bg-[#FFF5F7]/95 backdrop-blur-md border-b border-[#F0E5EA]">
+    <div
+      className="bg-[#FFF5F7] text-[#1F1B2E] flex flex-col overflow-hidden"
+      style={{ height: '100dvh' }}
+    >
+      {/* Top bar — fixed */}
+      <header className="flex-shrink-0 bg-[#FFF5F7] border-b border-[#F0E5EA]">
         <div className="max-w-[520px] mx-auto px-5 py-3 flex items-center justify-between">
           <button onClick={onBack} className="text-[14px] text-[#9A8FA3] font-medium hover:text-[#1F1B2E] transition-colors">
             ← Modifier
@@ -713,8 +716,8 @@ function ChooseStep({
         </div>
       </header>
 
-      {/* Map */}
-      <div className="relative w-full" style={{ height: '38vh', minHeight: 240 }}>
+      {/* Map — fixed height, does NOT scroll with the list */}
+      <div className="flex-shrink-0 relative w-full" style={{ height: '34vh', minHeight: 220 }}>
         <BetaMap
           coords={coords}
           midpoint={midpoint}
@@ -722,15 +725,14 @@ function ChooseStep({
           selectedPlaceId={selectedId}
           onPlaceSelect={(p) => setSelectedId(p.place_id)}
         />
-        {/* Legend */}
-        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 text-[10px] font-semibold text-[#6B6275] shadow-sm border border-[#F0E5EA]">
+        <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 text-[10px] font-semibold text-[#6B6275] shadow-sm border border-[#F0E5EA]">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#10D29B]" /> Point équidistant</span>
         </div>
       </div>
 
-      {/* Spot list */}
-      <div className="flex-1 bg-[#FFF5F7] pt-4 pb-32">
-        <div className="max-w-[520px] mx-auto px-5">
+      {/* Scrollable list — only this scrolls */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="max-w-[520px] mx-auto px-5 pt-4 pb-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[13px] font-bold text-[#6B6275] uppercase tracking-[2px]">
               {places.length} {emojiFor(spotType)} à proximité
@@ -755,8 +757,8 @@ function ChooseStep({
         </div>
       </div>
 
-      {/* Sticky confirm CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-[#FFF5F7] via-[#FFF5F7] to-transparent pt-8 pb-5 px-5">
+      {/* Confirm CTA — flex item, always visible, never overlaps */}
+      <div className="flex-shrink-0 px-5 py-4 bg-white border-t border-[#F0E5EA]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0) + 16px)' }}>
         <div className="max-w-[520px] mx-auto">
           <button
             onClick={() => selected && onConfirm(selected)}
