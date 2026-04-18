@@ -1,4 +1,4 @@
-export type TransportMode = 'walking' | 'bicycling' | 'transit';
+export type TransportMode = 'walking' | 'bicycling' | 'transit' | 'driving';
 
 export interface AddressItem {
   id: string;

@@ -10,6 +10,7 @@ const MODE_ICON: Record<TransportMode, string> = {
   walking: '🚶',
   bicycling: '🚲',
   transit: '🚇',
+  driving: '🚗',
 };
 
 function formatDate(dateStr: string, timeStr?: string): string {

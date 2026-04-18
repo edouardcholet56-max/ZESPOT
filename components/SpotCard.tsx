@@ -16,6 +16,7 @@ const MODE_ICON: Record<TransportMode, string> = {
   walking: '🚶',
   bicycling: '🚲',
   transit: '🚇',
+  driving: '🚗',
 };
 
 function formatTime(seconds: number | null | undefined): string {

@@ -48,7 +48,11 @@ export async function GET(request: NextRequest) {
   };
 
   // Map our mode names → Google API mode string
-  const gmMode = mode === 'bicycling' ? 'bicycling' : mode === 'walking' ? 'walking' : 'transit';
+  const gmMode =
+    mode === 'bicycling' ? 'bicycling' :
+    mode === 'walking'   ? 'walking'   :
+    mode === 'driving'   ? 'driving'   :
+    'transit';
 
   for (let iter = 0; iter < MAX_ITER; iter++) {
     try {
