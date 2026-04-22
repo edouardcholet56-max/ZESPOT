@@ -62,23 +62,30 @@ export default function BetaMap({
         maxZoom: 19,
       }).addTo(map);
 
-      // Person markers
+      // Person markers — small black square with serif label (You / F1 / F2 …)
       coords.forEach((c, i) => {
+        const label = i === 0 ? 'You' : `F${i}`;
         const icon = L.divIcon({
           className: '',
-          html: `<div style="width:32px;height:32px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.12);border:2px solid #FF4D8F;">${i === 0 ? '🏠' : '👋'}</div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
+          html: `<div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+            <div style="width:10px;height:10px;background:#000;"></div>
+            <div style="font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:11px;color:#000;background:rgba(245,242,238,0.95);padding:1px 6px;border:1px solid rgba(0,0,0,0.12);">${label}</div>
+          </div>`,
+          iconSize: [60, 12],
+          iconAnchor: [5, 6],
         });
         L.marker([c.lat, c.lng], { icon }).addTo(map);
       });
 
-      // Midpoint
+      // Midpoint — red cross mark (brand accent)
       const midIcon = L.divIcon({
         className: '',
-        html: `<div style="width:16px;height:16px;background:#10D29B;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 6px rgba(16,210,155,0.25),0 4px 12px rgba(0,0,0,0.15);"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
+        html: `<div style="position:relative;width:14px;height:14px;">
+          <div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:#D13631;"></div>
+          <div style="position:absolute;top:6px;left:0;width:14px;height:2px;background:#D13631;"></div>
+        </div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
       });
       L.marker([midpoint.lat, midpoint.lng], { icon: midIcon }).addTo(map);
 
@@ -151,27 +158,24 @@ export default function BetaMap({
 }
 
 // ── Icon factory ────────────────────────────────────────────────────────
+// Editorial style: small square markers — black by default, red when selected.
+// Selected marker shows the venue name in italic serif underneath.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildSpotIcon(L: any, p: Place, isSelected: boolean) {
-  const isTop = (p.rating ?? 0) >= 4;
-  const dotBg = isSelected ? '#FF4D8F' : '#fff';
-  const dotBorder = isTop ? '#F5B800' : isSelected ? '#FF4D8F' : '#B8A9B3';
-  const dotSize = isSelected ? 14 : 10;
-  const borderWidth = isTop ? 2.5 : 2;
+  const dotSize = isSelected ? 12 : 8;
+  const color = isSelected ? '#D13631' : '#000';
 
   const label = isSelected
-    ? `<div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:#FF4D8F;color:#fff;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 4px 12px rgba(255,77,143,0.35);max-width:140px;overflow:hidden;text-overflow:ellipsis;">${
-        p.name.length > 16 ? p.name.slice(0, 14) + '…' : p.name
+    ? `<div style="position:absolute;top:${dotSize + 4}px;left:50%;transform:translateX(-50%);font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:12px;color:#000;background:rgba(245,242,238,0.95);padding:2px 7px;border:1px solid rgba(0,0,0,0.12);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${
+        p.name.length > 18 ? p.name.slice(0, 16) + '…' : p.name
       }</div>`
     : '';
 
   return L.divIcon({
     className: '',
     html: `<div style="position:relative;">
+      <div style="width:${dotSize}px;height:${dotSize}px;background:${color};cursor:pointer;transition:all 0.15s;"></div>
       ${label}
-      <div style="width:${dotSize}px;height:${dotSize}px;background:${dotBg};border:${borderWidth}px solid ${dotBorder};border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,${
-        isSelected ? 0.2 : 0.12
-      });cursor:pointer;transition:all 0.15s;"></div>
     </div>`,
     iconSize: [dotSize, dotSize],
     iconAnchor: [dotSize / 2, dotSize / 2],

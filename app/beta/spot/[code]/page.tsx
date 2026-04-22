@@ -9,6 +9,7 @@ export default function BetaSharedSpotPage() {
   const { code } = useParams<{ code: string }>();
   const router = useRouter();
   const [place, setPlace] = useState<Place | null>(null);
+  const [time, setTime] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,10 +24,11 @@ export default function BetaSharedSpotPage() {
           return;
         }
         setPlace(data.spot as Place);
+        setTime(typeof data.time === 'string' ? data.time : null);
         setLoading(false);
       })
       .catch(() => {
-        setError('Erreur réseau.');
+        setError('Network error.');
         setLoading(false);
       });
   }, [code]);
@@ -37,103 +39,142 @@ export default function BetaSharedSpotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5F7] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-[#FFE4EC] border-t-[#FF4D8F] animate-spin" />
+      <div className="min-h-screen bg-[#F5F2EE] flex items-center justify-center">
+        <span className="inline-block w-4 h-4 border-t border-black animate-spin rounded-full" />
       </div>
     );
   }
 
   if (error || !place) {
     return (
-      <div className="min-h-screen bg-[#FFF5F7] flex flex-col items-center justify-center px-6 text-center text-[#1F1B2E]">
-        <div className="w-20 h-20 rounded-full bg-[#FFE4EC] flex items-center justify-center mb-5">
-          <span className="text-[40px]">😕</span>
-        </div>
-        <h1 className="text-[22px] font-bold tracking-[-0.5px] mb-2">Code introuvable</h1>
-        <p className="text-[13px] text-[#9A8FA3] mb-8 max-w-[280px] leading-relaxed">
-          Ce lien a peut-être expiré (7 jours) ou le code est invalide.
-        </p>
-        <button
-          onClick={() => router.push('/beta')}
-          className="px-6 py-3.5 bg-[#FF4D8F] hover:bg-[#ff6aa3] active:scale-[0.98] text-white text-[14px] font-bold rounded-[14px] transition-all shadow-[0_6px_18px_rgba(255,77,143,0.3)]"
-        >
-          Retour à l&apos;accueil
-        </button>
+      <div className="min-h-screen bg-[#F5F2EE] flex flex-col px-6">
+        <header className="pt-6 pb-4 flex items-center justify-between">
+          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">ZeSpot</span>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">404</span>
+        </header>
+        <hr />
+
+        <main className="flex-1 flex flex-col justify-center max-w-[380px] w-full mx-auto py-16">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Not found</p>
+          <h1 className="font-serif text-[42px] leading-[1.02] tracking-[-0.03em] mb-4">
+            This <span className="italic">ZeSpot</span> is gone.
+          </h1>
+          <p className="font-serif text-[17px] leading-[1.4] text-black/60 mb-12">
+            The link may have expired (7 days) or the code is invalid.
+          </p>
+        </main>
+
+        <hr />
+        <section className="py-8">
+          <button
+            onClick={() => router.push('/beta')}
+            className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
+          >
+            Back home
+          </button>
+        </section>
       </div>
     );
   }
 
+  const formattedTime = time ? formatDateTime(time) : null;
+
   return (
-    <div className="min-h-screen bg-[#FFF5F7] text-[#1F1B2E] pb-10 relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full opacity-30 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #10D29B66 0%, transparent 70%)' }}
-      />
-
-      {/* Header */}
-      <header className="relative z-10 pt-10 pb-6 text-center px-6">
-        <p className="text-[11px] font-bold text-[#10D29B] uppercase tracking-[3px] mb-1">
-          Zespot partagé
-        </p>
-        <h1 className="text-[32px] font-black tracking-[-1.5px]">
-          ZESP<span className="text-[#FF4D8F]">0</span>T
-        </h1>
+    <div className="min-h-screen bg-[#F5F2EE] text-black pb-16">
+      <header className="pt-6 pb-4 flex items-center justify-between max-w-[520px] mx-auto px-6">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Shared ZeSpot</span>
+        <span className="font-serif text-[13px] tracking-[0.08em] text-black/70">
+          {code?.toUpperCase()}
+        </span>
       </header>
+      <hr />
 
-      <div className="relative z-10 max-w-[480px] mx-auto px-5">
-        <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#F0E5EA] mb-4">
-          {place.photo_reference ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`/api/photo?ref=${encodeURIComponent(place.photo_reference)}&w=800`}
-              alt={place.name}
-              className="w-full h-[180px] object-cover"
-            />
-          ) : (
-            <div
-              className="w-full h-[140px] flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #FFE4EC 0%, #D6F9EC 100%)' }}
-            >
-              <span className="text-[60px] opacity-50">📍</span>
-            </div>
-          )}
-          <div className="p-5">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <h2 className="text-[20px] font-bold tracking-[-0.4px] leading-tight">{place.name}</h2>
-              {place.rating != null && (
-                <span className="flex items-center gap-1 text-[13px] font-bold text-[#1F1B2E] bg-[#FFF5E0] px-2.5 py-1 rounded-full flex-shrink-0">
-                  ★ {place.rating.toFixed(1)}
-                </span>
-              )}
-            </div>
-            <p className="text-[13px] text-[#6B6275] leading-relaxed mb-3">📍 {place.address}</p>
-            <div className="flex items-center gap-2 pt-3 border-t border-[#F5EEF2]">
-              <span className="text-[10px] uppercase tracking-[1.5px] text-[#9A8FA3] font-bold">Code</span>
-              <span className="font-mono font-black text-[14px] tracking-[3px] text-[#1F1B2E]">
-                {code?.toUpperCase()}
-              </span>
-            </div>
+      <main className="max-w-[520px] mx-auto px-6 pt-10 space-y-12">
+        <section>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-[#D13631] mb-4">
+            You&apos;re invited
+          </p>
+          <h1 className="font-serif text-[44px] leading-[1.02] tracking-[-0.03em]">
+            Meet at <span className="italic">{place.name}.</span>
+          </h1>
+          <p className="text-[13px] text-black/60 mt-3 leading-relaxed">{place.address}</p>
+        </section>
+
+        {place.photo_reference ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={`/api/photo?ref=${encodeURIComponent(place.photo_reference)}&w=800`}
+            alt={place.name}
+            className="w-full h-[220px] object-cover"
+          />
+        ) : (
+          <div className="w-full h-[180px] border border-black/10 flex items-center justify-center">
+            <span className="font-serif italic text-[26px] text-black/30">ZeSpot</span>
           </div>
-        </div>
+        )}
 
-        <div className="space-y-2.5">
+        {/* When — only shown if set */}
+        {formattedTime && (
+          <section>
+            <hr className="mb-6" />
+            <p className="text-[11px] uppercase tracking-[0.2em] text-black/60 mb-3">
+              When
+            </p>
+            <p className="font-serif text-[28px] leading-[1.15] tracking-[-0.02em]">
+              <span className="italic">{formattedTime}.</span>
+            </p>
+          </section>
+        )}
+
+        <hr />
+
+        {place.rating != null && (
+          <section>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-black/60 mb-3">
+              The spot
+            </p>
+            <div className="flex items-center gap-6 text-[11px] uppercase tracking-[0.15em] text-black/70">
+              <span>★ {place.rating.toFixed(1)}</span>
+              {place.user_ratings_total != null && <span>{place.user_ratings_total} reviews</span>}
+            </div>
+          </section>
+        )}
+
+        <hr />
+
+        <section className="space-y-3">
           <a
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-4 bg-[#FF4D8F] hover:bg-[#ff6aa3] active:scale-[0.98] text-white text-[15px] font-bold rounded-[18px] text-center transition-all shadow-[0_8px_24px_rgba(255,77,143,0.3)] block"
+            className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
           >
-            🗺 Ouvrir dans Google Maps
+            Open in Google Maps
           </a>
           <Link
             href="/beta/find"
-            className="w-full py-3.5 bg-white border-2 border-[#10D29B] text-[#10D29B] text-[14px] font-bold rounded-[18px] text-center block transition-all hover:bg-[#D6F9EC] active:scale-[0.98]"
+            className="block w-full py-4 border border-black/20 text-black text-[12px] uppercase tracking-[0.18em] text-center hover:border-black transition-colors"
           >
-            Créer mon propre Zespot →
+            Create my own ZeSpot
           </Link>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
+}
+
+function formatDateTime(value: string): string {
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+    return d.toLocaleString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  } catch {
+    return value;
+  }
 }

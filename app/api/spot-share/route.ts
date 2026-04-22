@@ -34,3 +34,22 @@ export async function GET(request: NextRequest) {
   if (!data) return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 404 });
   return NextResponse.json(data);
 }
+
+// PATCH /api/spot-share  { code, time? }  → { ok }
+// Used to attach/update a meeting time on an existing shared spot without rotating the code.
+export async function PATCH(request: NextRequest) {
+  const body = await request.json();
+  const code: string | undefined = body?.code?.toUpperCase().trim();
+  const time: string | null = typeof body?.time === 'string' && body.time ? body.time : null;
+  if (!code) return NextResponse.json({ error: 'code required' }, { status: 400 });
+  if (!redis.configured()) {
+    return NextResponse.json({ error: 'Redis not configured' }, { status: 500 });
+  }
+
+  const existing = await redis.get<{ spot: unknown; time?: string }>(`spot:${code}`);
+  if (!existing) return NextResponse.json({ error: 'Code invalide ou expiré' }, { status: 404 });
+
+  const next = time ? { ...existing, time } : { spot: existing.spot };
+  await redis.set(`spot:${code}`, next, 60 * 60 * 24 * 7);
+  return NextResponse.json({ ok: true });
+}

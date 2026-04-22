@@ -2,86 +2,52 @@
 
 import Link from 'next/link';
 
+/**
+ * Landing page — editorial, minimal.
+ * Tagline: "Meet better."
+ */
 export default function BetaHomePage() {
   return (
-    <div className="min-h-screen bg-[#FFF5F7] text-[#1F1B2E] flex flex-col items-center justify-between px-6 py-12 overflow-hidden relative">
-      {/* Soft decorative blobs */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -left-24 w-[320px] h-[320px] rounded-full opacity-40 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #10D29B55 0%, transparent 70%)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-32 -right-20 w-[360px] h-[360px] rounded-full opacity-40 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #FF4D8F55 0%, transparent 70%)' }}
-      />
-
-      {/* Top badge */}
-      <div className="relative z-10 w-full max-w-[430px] flex justify-center pt-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/70 backdrop-blur rounded-full text-[11px] font-semibold tracking-[2px] uppercase text-[#10D29B] border border-[#10D29B]/20 shadow-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#10D29B] animate-pulse" />
-          Beta testing
+    <div className="min-h-screen bg-[#F5F2EE] text-black flex flex-col px-6">
+      {/* Top bar */}
+      <header className="pt-6 pb-4 flex items-center justify-between">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+          Beta
         </span>
-      </div>
+        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+          v0.1
+        </span>
+      </header>
 
-      {/* Logo */}
-      <div className="relative z-10 flex flex-col items-center">
-        <div className="relative">
-          {/* Pulsing halo */}
-          <div className="zespot-halo absolute inset-0 rounded-full" />
-          <h1 className="relative text-[64px] sm:text-[72px] font-black tracking-[-3px] leading-none select-none">
-            ZESP<span className="text-[#FF4D8F] zespot-zero">0</span>T
-          </h1>
-        </div>
-        <p className="mt-5 text-[15px] text-[#6B6275] text-center max-w-[300px] leading-relaxed">
-          Le lieu parfait pour retrouver tes amis,<br />à temps de trajet égal.
+      <hr />
+
+      {/* Hero */}
+      <main className="flex-1 flex flex-col justify-center py-12">
+        <p className="text-[12px] uppercase tracking-[0.25em] text-black/50 mb-6">
+          Meet better.
         </p>
-      </div>
+        <h1 className="font-serif text-[84px] leading-[0.95] tracking-[-0.04em] mb-8">
+          <span className="italic">Ze</span>Spot
+        </h1>
+        <p className="font-serif text-[22px] leading-[1.3] text-black/75 max-w-[320px]">
+          The perfect place to meet your friends, <span className="italic">at equal travel time.</span>
+        </p>
+      </main>
 
-      {/* CTAs */}
-      <div className="relative z-10 w-full max-w-[430px] flex flex-col gap-3 pb-6">
+      <hr />
+
+      {/* CTA */}
+      <section className="py-8 space-y-4">
         <Link
           href="/beta/find"
-          className="w-full py-4 bg-[#FF4D8F] hover:bg-[#ff6aa3] active:scale-[0.98] text-white text-[16px] font-bold rounded-[18px] text-center transition-all shadow-[0_8px_24px_rgba(255,77,143,0.35)]"
+          className="block w-full py-5 bg-[#D13631] text-white text-[14px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
         >
-          ✨ Créer mon Zespot
+          Find our spot
         </Link>
-
-        <p className="text-center text-[11px] text-[#9A8FA3] mt-3 tracking-[0.5px]">
-          Merci de tester Zespot 💚 ton feedback compte.
+        <p className="text-[11px] uppercase tracking-[0.15em] text-black/40 text-center">
+          Thanks for testing ZeSpot — your feedback matters.
         </p>
-      </div>
-
-      <style jsx>{`
-        @keyframes zespotHalo {
-          0%, 100% {
-            box-shadow:
-              0 0 0 0 rgba(16, 210, 155, 0),
-              0 0 40px 10px rgba(16, 210, 155, 0.25),
-              0 0 80px 30px rgba(255, 77, 143, 0.12);
-          }
-          50% {
-            box-shadow:
-              0 0 0 0 rgba(16, 210, 155, 0),
-              0 0 60px 20px rgba(16, 210, 155, 0.45),
-              0 0 100px 40px rgba(255, 77, 143, 0.2);
-          }
-        }
-        @keyframes zespotZero {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.08); }
-        }
-        .zespot-halo {
-          animation: zespotHalo 2.8s ease-in-out infinite;
-          border-radius: 50%;
-        }
-        .zespot-zero {
-          display: inline-block;
-          animation: zespotZero 2.8s ease-in-out infinite;
-          transform-origin: center;
-        }
-      `}</style>
+      </section>
     </div>
   );
 }

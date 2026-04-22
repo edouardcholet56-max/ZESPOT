@@ -15,11 +15,11 @@ interface BetaSpot {
   createdAt: number;
 }
 
-const TYPE_META: Record<BetaSpot['type'], { emoji: string; label: string; accent: 'rose' | 'green' }> = {
-  bar:        { emoji: '🍺', label: 'Bar',         accent: 'rose'  },
-  restaurant: { emoji: '🍽', label: 'Restaurant',  accent: 'rose'  },
-  park:       { emoji: '🌳', label: 'Espace vert', accent: 'green' },
-  museum:     { emoji: '🏛', label: 'Musée',       accent: 'green' },
+const TYPE_LABEL: Record<BetaSpot['type'], string> = {
+  bar: 'Bar',
+  restaurant: 'Restaurant',
+  park: 'Park',
+  museum: 'Museum',
 };
 
 export default function BetaMesSpotsPage() {
@@ -32,51 +32,53 @@ export default function BetaMesSpotsPage() {
   }, []);
 
   const remove = (code: string) => {
-    if (!confirm('Retirer ce spot de ta liste ?')) return;
+    if (!confirm('Remove this spot from your list?')) return;
     storage.removeBetaSpot(code);
     setSpots((prev) => prev.filter((s) => s.code !== code));
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF5F7] text-[#1F1B2E]">
-      <header className="sticky top-0 z-20 bg-[#FFF5F7]/90 backdrop-blur-md border-b border-[#F0E5EA]">
-        <div className="max-w-[520px] mx-auto px-5 py-4 flex items-center justify-between">
-          <Link href="/beta" className="text-[14px] text-[#9A8FA3] font-medium hover:text-[#1F1B2E] transition-colors">
-            ← Retour
+    <div className="min-h-screen bg-[#F5F2EE] text-black">
+      <header className="sticky top-0 z-20 bg-[#F5F2EE]">
+        <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
+          <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
+            ← Back
           </Link>
-          <h1 className="text-[15px] font-bold tracking-[-0.3px]">Mes spots</h1>
-          <div className="w-12" />
+          <h1 className="font-serif text-[18px] tracking-[-0.01em]">
+            My <span className="italic">spots</span>
+          </h1>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+            {loaded ? spots.length : '—'}
+          </span>
         </div>
+        <hr />
       </header>
 
-      <main className="max-w-[520px] mx-auto px-5 pt-6 pb-12">
+      <main className="max-w-[520px] mx-auto px-6 pt-10 pb-16">
         {!loaded ? (
           <div className="flex justify-center py-20">
-            <div className="w-6 h-6 rounded-full border-2 border-[#FFE4EC] border-t-[#FF4D8F] animate-spin" />
+            <span className="inline-block w-4 h-4 border-t border-black animate-spin rounded-full" />
           </div>
         ) : spots.length === 0 ? (
-          <div className="text-center py-20 px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FFE4EC] to-[#D6F9EC] flex items-center justify-center mx-auto mb-5">
-              <span className="text-[36px]">✨</span>
-            </div>
-            <h2 className="text-[18px] font-bold tracking-[-0.3px] mb-2">Aucun spot encore</h2>
-            <p className="text-[13px] text-[#9A8FA3] mb-8 leading-relaxed">
-              Crée ton premier Zespot pour retrouver tes amis.
+          <div className="py-12">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Empty</p>
+            <h2 className="font-serif text-[40px] leading-[1] tracking-[-0.03em] mb-5">
+              No spot <span className="italic">yet.</span>
+            </h2>
+            <p className="font-serif text-[17px] leading-[1.4] text-black/60 mb-10 max-w-[320px]">
+              Drop a mood — create your first ZeSpot to meet friends <span className="italic">at equal travel time.</span>
             </p>
             <Link
               href="/beta/find"
-              className="inline-block px-6 py-3.5 bg-[#FF4D8F] hover:bg-[#ff6aa3] active:scale-[0.98] text-white text-[14px] font-bold rounded-[14px] transition-all shadow-[0_6px_18px_rgba(255,77,143,0.3)]"
+              className="inline-block py-4 px-8 bg-[#D13631] text-white text-[12px] uppercase tracking-[0.18em] active:bg-black transition-colors"
             >
-              ✨ Créer mon premier Zespot
+              Find our spot
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold text-[#6B6275] uppercase tracking-[2px] mb-2 px-1">
-              {spots.length} {spots.length > 1 ? 'spots créés' : 'spot créé'}
-            </p>
+          <div className="border-y border-black/10 divide-y divide-black/10">
             {spots.map((spot) => (
-              <SpotCard key={spot.code} spot={spot} onRemove={() => remove(spot.code)} />
+              <SpotRow key={spot.code} spot={spot} onRemove={() => remove(spot.code)} />
             ))}
           </div>
         )}
@@ -85,70 +87,50 @@ export default function BetaMesSpotsPage() {
   );
 }
 
-function SpotCard({ spot, onRemove }: { spot: BetaSpot; onRemove: () => void }) {
-  const meta = TYPE_META[spot.type] || TYPE_META.bar;
-  const accentColor = meta.accent === 'rose' ? '#FF4D8F' : '#10D29B';
-  const accentBg = meta.accent === 'rose' ? '#FFE4EC' : '#D6F9EC';
+function SpotRow({ spot, onRemove }: { spot: BetaSpot; onRemove: () => void }) {
+  const label = TYPE_LABEL[spot.type] || 'Spot';
 
   return (
-    <Link
-      href={`/beta/spot/${spot.code}`}
-      className="block bg-white border border-[#F0E5EA] rounded-[18px] p-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all active:scale-[0.99] group"
-    >
-      <div className="flex items-center gap-3">
-        {spot.photo_reference ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={`/api/photo?ref=${encodeURIComponent(spot.photo_reference)}&w=200`}
-            alt={spot.name}
-            className="w-16 h-16 rounded-[12px] object-cover flex-shrink-0"
-          />
-        ) : (
-          <div
-            className="w-16 h-16 rounded-[12px] flex items-center justify-center flex-shrink-0 text-[28px]"
-            style={{ background: accentBg }}
-          >
-            {meta.emoji}
-          </div>
-        )}
+    <div className="py-5 group">
+      <Link href={`/beta/spot/${spot.code}`} className="block">
+        <div className="flex items-start gap-4">
+          {spot.photo_reference ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/api/photo?ref=${encodeURIComponent(spot.photo_reference)}&w=200`}
+              alt={spot.name}
+              className="w-16 h-16 object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 border border-black/10 flex items-center justify-center flex-shrink-0">
+              <span className="font-serif italic text-[12px] text-black/30">Ze</span>
+            </div>
+          )}
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span
-              className="text-[10px] font-bold uppercase tracking-[1.5px] px-1.5 py-0.5 rounded"
-              style={{ color: accentColor, background: accentBg }}
-            >
-              {meta.label}
-            </span>
-            {spot.rating != null && (
-              <span className="text-[10px] font-bold text-[#1F1B2E]">★ {spot.rating.toFixed(1)}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-black/50 mb-1">
+              <span>{label}</span>
+              {spot.rating != null && <span>★ {spot.rating.toFixed(1)}</span>}
+              <span className="font-serif italic text-black/70 normal-case tracking-[0.08em]">
+                {spot.code}
+              </span>
+            </div>
+            <h3 className="font-serif text-[22px] leading-[1.15] tracking-[-0.01em] truncate">
+              {spot.name}
+            </h3>
+            {spot.address && (
+              <p className="text-[11px] text-black/50 truncate mt-1.5">{spot.address}</p>
             )}
           </div>
-          <h3 className="text-[15px] font-bold tracking-[-0.2px] truncate">{spot.name}</h3>
-          {spot.address && (
-            <p className="text-[11px] text-[#9A8FA3] truncate">📍 {spot.address}</p>
-          )}
-          <p className="text-[10px] text-[#B8A9B3] mt-0.5 font-mono tracking-[1px]">
-            {spot.code}
-          </p>
         </div>
+      </Link>
 
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="p-2 text-[#B8A9B3] hover:text-[#FF4D8F] transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100"
-          aria-label="Retirer"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
-            <path d="M10 11v6M14 11v6"/>
-          </svg>
-        </button>
-      </div>
-    </Link>
+      <button
+        onClick={onRemove}
+        className="mt-3 ml-20 text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-[#D13631] transition-colors"
+      >
+        Remove
+      </button>
+    </div>
   );
 }
