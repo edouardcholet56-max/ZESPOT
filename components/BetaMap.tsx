@@ -62,27 +62,27 @@ export default function BetaMap({
         maxZoom: 19,
       }).addTo(map);
 
-      // Person markers — small black square with serif label (You / F1 / F2 …)
+      // Person markers — small black square with Helvetica Neue uppercase label.
       coords.forEach((c, i) => {
-        const label = i === 0 ? 'You' : `F${i}`;
+        const label = i === 0 ? 'TOI' : `A${i}`;
         const icon = L.divIcon({
           className: '',
           html: `<div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
             <div style="width:10px;height:10px;background:#000;"></div>
-            <div style="font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:11px;color:#000;background:rgba(232,228,219,0.95);padding:1px 6px;border:1px solid rgba(0,0,0,0.12);">${label}</div>
+            <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:10px;letter-spacing:0.12em;color:#000;background:rgba(255,255,255,0.95);padding:2px 6px;border:1px solid rgba(0,0,0,0.15);">${label}</div>
           </div>`,
-          iconSize: [60, 12],
-          iconAnchor: [5, 6],
+          iconSize: [60, 14],
+          iconAnchor: [5, 7],
         });
         L.marker([c.lat, c.lng], { icon }).addTo(map);
       });
 
-      // Midpoint — red cross mark (brand accent)
+      // Midpoint — black cross.
       const midIcon = L.divIcon({
         className: '',
         html: `<div style="position:relative;width:14px;height:14px;">
-          <div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:#D13631;"></div>
-          <div style="position:absolute;top:6px;left:0;width:14px;height:2px;background:#D13631;"></div>
+          <div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:#000;"></div>
+          <div style="position:absolute;top:6px;left:0;width:14px;height:2px;background:#000;"></div>
         </div>`,
         iconSize: [14, 14],
         iconAnchor: [7, 7],
@@ -158,23 +158,26 @@ export default function BetaMap({
 }
 
 // ── Icon factory ────────────────────────────────────────────────────────
-// Editorial style: small square markers — black by default, red when selected.
-// Selected marker shows the venue name in italic serif underneath.
+// Helvetica Neue style: small square markers — thin outline by default,
+// filled black when selected. Selected marker shows the venue name underneath.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildSpotIcon(L: any, p: Place, isSelected: boolean) {
-  const dotSize = isSelected ? 12 : 8;
-  const color = isSelected ? '#D13631' : '#000';
+  const dotSize = isSelected ? 12 : 9;
+
+  const dot = isSelected
+    ? `<div style="width:${dotSize}px;height:${dotSize}px;background:#000;border:1px solid #000;cursor:pointer;"></div>`
+    : `<div style="width:${dotSize}px;height:${dotSize}px;background:#fff;border:1.5px solid #000;cursor:pointer;"></div>`;
 
   const label = isSelected
-    ? `<div style="position:absolute;top:${dotSize + 4}px;left:50%;transform:translateX(-50%);font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:12px;color:#000;background:rgba(232,228,219,0.95);padding:2px 7px;border:1px solid rgba(0,0,0,0.12);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${
-        p.name.length > 18 ? p.name.slice(0, 16) + '…' : p.name
+    ? `<div style="position:absolute;top:${dotSize + 4}px;left:50%;transform:translateX(-50%);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.04em;color:#000;background:rgba(255,255,255,0.97);padding:3px 7px;border:1px solid rgba(0,0,0,0.15);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${
+        p.name.length > 22 ? p.name.slice(0, 20) + '…' : p.name
       }</div>`
     : '';
 
   return L.divIcon({
     className: '',
     html: `<div style="position:relative;">
-      <div style="width:${dotSize}px;height:${dotSize}px;background:${color};cursor:pointer;transition:all 0.15s;"></div>
+      ${dot}
       ${label}
     </div>`,
     iconSize: [dotSize, dotSize],

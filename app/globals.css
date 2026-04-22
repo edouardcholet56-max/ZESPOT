@@ -48,36 +48,45 @@ body {
 }
 
 /* ──────────────────────────────────────────────────────────────────── */
-/* BETA — editorial theme overrides (scoped to .beta-root)              */
+/* BETA — Helvetica Neue theme (scoped to .beta-root)                   */
+/* Palette: black / white / grey via opacity. No accent colour.         */
 /* ──────────────────────────────────────────────────────────────────── */
 .beta-root {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
   color: #000;
+  background: #ffffff;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+.beta-root .hn-light   { font-weight: 300; }
+.beta-root .hn-regular { font-weight: 400; }
+.beta-root .hn-medium  { font-weight: 500; }
+.beta-root .hn-bold    { font-weight: 700; }
+.beta-root .hn-black   { font-weight: 900; }
+
+/* Condensed Black — used for the wordmark. */
+.beta-root .hn-cond-black {
+  font-family: "HelveticaNeue-CondensedBlack", "Helvetica Neue Condensed",
+               "Helvetica Neue", "Arial Narrow", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-stretch: 75%;
+  letter-spacing: -0.03em;
+}
+
+/* Neutralise the old serif class — beta is all Helvetica Neue now. */
 .beta-root .font-serif,
 .beta-root .serif {
-  font-family: var(--font-serif), 'Instrument Serif', Georgia, serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: normal;
 }
+.beta-root .italic { font-style: normal; }
+
 .beta-root hr {
   border: none;
   border-top: 1px solid #000;
-  opacity: 0.12;
+  opacity: 0.15;
   margin: 0;
-}
-
-/* Display headings + captions use the brand red.
-   Captions are any uppercase letter-spaced eyebrow/meta text.
-   Excluded: CTAs (text-white / bg-) and disabled states. */
-.beta-root h1,
-.beta-root h2 {
-  color: #D13631;
-}
-.beta-root [class*="uppercase"][class*="tracking-["]:not([class*="text-white"]):not([class*="bg-[#D13631]"]):not([class*="bg-black"]):not([class*="disabled:"]) {
-  color: #D13631;
-}
-.beta-root .caption {
-  color: #D13631;
 }
 
 /* Leaflet light overrides for beta */
@@ -90,12 +99,12 @@ body {
 }
 .beta-root .leaflet-popup-tip { background: #fff !important; }
 .beta-root .leaflet-popup-content {
-  font-family: var(--font-geist-sans), sans-serif !important;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-size: 13px !important;
   color: #000 !important;
 }
 .beta-root .leaflet-control-attribution {
-  background: rgba(232,228,219,0.85) !important;
+  background: rgba(255,255,255,0.9) !important;
   color: #000 !important;
 }
 .beta-root .leaflet-control-attribution a { color: #000 !important; }

@@ -19,22 +19,22 @@ const MIN_ADDRESSES = 2;
 const SPOT_TYPES: { key: SpotType; label: string }[] = [
   { key: 'bar',        label: 'Bar'        },
   { key: 'restaurant', label: 'Restaurant' },
-  { key: 'park',       label: 'Park'       },
-  { key: 'museum',     label: 'Museum'     },
+  { key: 'park',       label: 'Parc'       },
+  { key: 'museum',     label: 'Musée'      },
 ];
 
 const MODES: { key: TransportMode; label: string }[] = [
-  { key: 'walking',   label: 'Walk'    },
-  { key: 'bicycling', label: 'Bike'    },
-  { key: 'transit',   label: 'Transit' },
-  { key: 'driving',   label: 'Drive'   },
+  { key: 'walking',   label: 'À pied'      },
+  { key: 'bicycling', label: 'Vélo'        },
+  { key: 'transit',   label: 'Transports'  },
+  { key: 'driving',   label: 'Voiture'     },
 ];
 
 const LOADING_STEPS = [
-  'Pinning friends',
-  'Computing equal-time midpoint',
-  'Scouting venues',
-  'Almost there',
+  'Localisation des amis',
+  'Point d\u2019équi-temps',
+  'Repérage des lieux',
+  'Presque là',
 ];
 
 export default function BetaFindPage() {
@@ -64,7 +64,7 @@ export default function BetaFindPage() {
     if (saved) {
       setAddresses((prev) => {
         const updated = [...prev];
-        updated[0] = { ...updated[0], value: saved, label: 'Me' };
+        updated[0] = { ...updated[0], value: saved, label: 'Moi' };
         return updated;
       });
       setStep('form-1');
@@ -92,7 +92,7 @@ export default function BetaFindPage() {
             storage.myAddress = data.address;
             setAddresses((prev) => {
               const updated = [...prev];
-              updated[0] = { ...updated[0], value: data.address, label: 'Me' };
+              updated[0] = { ...updated[0], value: data.address, label: 'Moi' };
               return updated;
             });
           }
@@ -118,7 +118,7 @@ export default function BetaFindPage() {
   const findSpot = async () => {
     const filled = addresses.filter((a) => a.value.trim().length > 0);
     if (filled.length < 2) {
-      setError('We need at least 2 addresses (you + 1 friend).');
+      setError('Il nous faut au moins 2 adresses (toi + 1 ami).');
       return;
     }
     setError('');
@@ -131,7 +131,7 @@ export default function BetaFindPage() {
       for (const addr of filled) {
         const res = await fetch(`/api/geocode?address=${encodeURIComponent(addr.value)}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Address not found');
+        if (!res.ok) throw new Error(data.error || 'Adresse introuvable');
         geocoded.push({ lat: data.lat, lng: data.lng });
       }
       setCoords(geocoded);
@@ -162,7 +162,7 @@ export default function BetaFindPage() {
         placesData = await placesRes.json();
         raw = placesData.places || [];
       }
-      if (raw.length === 0) throw new Error(`No ${spotTypeLabel(spotType).toLowerCase()} found nearby.`);
+      if (raw.length === 0) throw new Error(`Aucun ${spotTypeLabel(spotType).toLowerCase()} trouvé près du point.`);
 
       let list: Place[] = raw
         .map((p) => ({ ...p, dist: haversine(mid.lat, mid.lng, p.lat, p.lng) }))
@@ -196,7 +196,7 @@ export default function BetaFindPage() {
       setSelectedId(list[0]?.place_id || null);
       setStep('choose');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.');
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
       setStep('form-1');
     }
   };
@@ -311,23 +311,25 @@ export default function BetaFindPage() {
 
 function GeolocStep({ onAccept, onSkip }: { onAccept: () => void; onSkip: () => void }) {
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black flex flex-col px-6">
+    <div className="min-h-screen bg-white text-black flex flex-col px-6">
       <header className="pt-6 pb-4 flex items-center justify-between">
-        <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
-          ← Back
+        <Link href="/beta" className="text-[12px] uppercase tracking-[0.18em] text-black/50 hover:text-black transition-colors">
+          ← Retour
         </Link>
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Step 1 / 3</span>
+        <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">01 / 03</span>
       </header>
 
       <hr />
 
       <main className="flex-1 flex flex-col justify-center py-16 max-w-[380px] w-full mx-auto">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Location</p>
-        <h1 className="font-serif text-[52px] leading-[1] tracking-[-0.03em] mb-6">
-          Where <span className="italic">are</span> you?
+        <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-6 hn-regular">
+          Localisation
+        </p>
+        <h1 className="hn-light text-[46px] leading-[1.05] tracking-[-0.02em] text-black mb-5">
+          Où es-tu ?
         </h1>
-        <p className="font-serif text-[19px] leading-[1.4] text-black/70 mb-12">
-          Share your location — we&apos;ll pre-fill your address so you can <span className="italic">skip the typing.</span>
+        <p className="hn-light text-[17px] leading-[1.5] text-black/60">
+          Partage ta position — on pré-remplit ton adresse pour t&apos;éviter la saisie.
         </p>
       </main>
 
@@ -336,15 +338,15 @@ function GeolocStep({ onAccept, onSkip }: { onAccept: () => void; onSkip: () => 
       <section className="py-8 space-y-3">
         <button
           onClick={onAccept}
-          className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
+          className="block w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors"
         >
-          Share my location
+          Partager ma position
         </button>
         <button
           onClick={onSkip}
           className="block w-full py-3 text-[12px] uppercase tracking-[0.15em] text-black/50 hover:text-black transition-colors"
         >
-          Later
+          Plus tard
         </button>
       </section>
     </div>
@@ -367,19 +369,17 @@ function StepShell({
   cta: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black pb-28 flex flex-col">
-      <header className="sticky top-0 z-20 bg-[#E8E4DB]">
+    <div className="min-h-screen bg-white text-black pb-28 flex flex-col">
+      <header className="sticky top-0 z-20 bg-white">
         <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors"
+            className="text-[12px] uppercase tracking-[0.18em] text-black/50 hover:text-black transition-colors"
           >
-            ← Back
+            ← Retour
           </button>
-          <h1 className="font-serif text-[18px] tracking-[-0.01em]">
-            <span className="italic">Ze</span>Spot
-          </h1>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+          <h1 className="hn-cond-black text-[20px] leading-none">zespot</h1>
+          <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">
             {String(stepNumber).padStart(2, '0')} / 03
           </span>
         </div>
@@ -390,7 +390,7 @@ function StepShell({
         {children}
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#E8E4DB]">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white">
         <hr />
         <div
           className="max-w-[520px] mx-auto px-6 py-5"
@@ -403,11 +403,15 @@ function StepShell({
   );
 }
 
-function StepHero({ eyebrow, title }: { eyebrow: string; title: React.ReactNode }) {
+function StepHero({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <section>
-      <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-4">{eyebrow}</p>
-      <h2 className="font-serif text-[44px] leading-[1] tracking-[-0.03em]">{title}</h2>
+      <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-4 hn-regular">
+        {eyebrow}
+      </p>
+      <h2 className="hn-light text-[44px] leading-[1.05] tracking-[-0.02em] text-black">
+        {title}
+      </h2>
     </section>
   );
 }
@@ -416,8 +420,8 @@ function SectionLabel({ index, title, meta }: { index: string; title: string; me
   return (
     <div className="flex items-baseline justify-between mb-4">
       <div className="flex items-baseline gap-3">
-        <span className="font-serif italic text-[13px] text-black/40">{index}</span>
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/60">{title}</span>
+        <span className="hn-regular text-[12px] text-black/40">{index}</span>
+        <span className="text-[11px] uppercase tracking-[0.18em] text-black/60 hn-regular">{title}</span>
       </div>
       {meta && <span className="text-[11px] uppercase tracking-[0.15em] text-black/40">{meta}</span>}
     </div>
@@ -425,7 +429,7 @@ function SectionLabel({ index, title, meta }: { index: string; title: string; me
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// FORM STEP 1 — ADDRESSES  (Who's coming)
+// FORM STEP 1 — ADDRESSES
 // ═════════════════════════════════════════════════════════════════════
 
 function FormStepAddresses({
@@ -457,21 +461,18 @@ function FormStepAddresses({
         <button
           onClick={onNext}
           disabled={!canAdvance}
-          className="w-full py-5 bg-[#D13631] disabled:bg-black/20 text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors disabled:cursor-not-allowed"
+          className="w-full py-5 bg-black disabled:bg-black/15 text-white text-[13px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors disabled:cursor-not-allowed"
         >
-          {canAdvance ? 'Next →' : `Add ${MIN_ADDRESSES - filledCount} more`}
+          {canAdvance ? 'Suivant →' : `Ajoute ${MIN_ADDRESSES - filledCount} adresse${MIN_ADDRESSES - filledCount > 1 ? 's' : ''}`}
         </button>
       }
     >
-      <StepHero
-        eyebrow="Step 01"
-        title={<>Who&apos;s <span className="italic">coming?</span></>}
-      />
+      <StepHero eyebrow="Étape 01" title="Qui vient ?" />
 
       <section>
         <SectionLabel
           index="01"
-          title="Addresses"
+          title="Adresses"
           meta={`${addresses.length} / ${MAX_ADDRESSES}`}
         />
         <div className="divide-y divide-black/10 border-y border-black/10">
@@ -479,8 +480,8 @@ function FormStepAddresses({
             <AddressInput
               key={addr.id}
               value={addr.value}
-              placeholder={i === 0 ? 'Your address' : `Friend ${i}`}
-              prefix={i === 0 ? 'You' : `F${i}`}
+              placeholder={i === 0 ? 'Ton adresse' : `Ami ${i}`}
+              prefix={i === 0 ? 'Toi' : `A${i}`}
               removable={i >= MIN_ADDRESSES}
               onChange={(v) => updateAddress(addr.id, v)}
               onRemove={() => removeAddress(addr.id)}
@@ -491,15 +492,15 @@ function FormStepAddresses({
           <button
             type="button"
             onClick={addAddress}
-            className="mt-4 text-[11px] uppercase tracking-[0.18em] text-black/60 hover:text-[#D13631] transition-colors"
+            className="mt-4 text-[11px] uppercase tracking-[0.18em] text-black/60 hover:text-black transition-colors"
           >
-            + Add address
+            + Ajouter une adresse
           </button>
         )}
       </section>
 
       {error && (
-        <div className="border-l-2 border-[#D13631] pl-4 py-2 text-[13px] text-[#D13631]">
+        <div className="border-l-2 border-black pl-4 py-2 text-[13px] text-black/80">
           {error}
         </div>
       )}
@@ -508,7 +509,7 @@ function FormStepAddresses({
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// FORM STEP 2 — SPOT TYPE  (Where to?)
+// FORM STEP 2 — SPOT TYPE
 // ═════════════════════════════════════════════════════════════════════
 
 function FormStepType({
@@ -529,19 +530,16 @@ function FormStepType({
       cta={
         <button
           onClick={onNext}
-          className="w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors"
+          className="w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors"
         >
-          Next →
+          Suivant →
         </button>
       }
     >
-      <StepHero
-        eyebrow="Step 02"
-        title={<>Where <span className="italic">to?</span></>}
-      />
+      <StepHero eyebrow="Étape 02" title="On va où ?" />
 
       <section>
-        <SectionLabel index="02" title="Pick a vibe" />
+        <SectionLabel index="02" title="Ambiance" />
         <div className="border-y border-black/10 divide-y divide-black/10">
           {SPOT_TYPES.map((t) => {
             const active = spotType === t.key;
@@ -551,14 +549,12 @@ function FormStepType({
                 onClick={() => setSpotType(t.key)}
                 className="w-full flex items-center justify-between py-4 text-left transition-colors hover:bg-black/[0.02]"
               >
-                <span
-                  className={`font-serif text-[22px] tracking-[-0.01em] ${active ? 'text-[#D13631]' : 'text-black'}`}
-                >
-                  {active ? <span className="italic">{t.label}</span> : t.label}
+                <span className={`hn-light text-[22px] tracking-[-0.01em] ${active ? 'text-black hn-regular' : 'text-black/70'}`}>
+                  {t.label}
                 </span>
                 <span
                   className={`w-3 h-3 border transition-all ${
-                    active ? 'bg-[#D13631] border-[#D13631]' : 'border-black/30'
+                    active ? 'bg-black border-black' : 'border-black/30'
                   }`}
                 />
               </button>
@@ -571,7 +567,7 @@ function FormStepType({
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// FORM STEP 3 — MODE  (How you travel?)
+// FORM STEP 3 — MODE
 // ═════════════════════════════════════════════════════════════════════
 
 function FormStepMode({
@@ -594,16 +590,13 @@ function FormStepMode({
       cta={
         <button
           onClick={onSubmit}
-          className="w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors"
+          className="w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors"
         >
-          Find our spot
+          Trouver notre spot
         </button>
       }
     >
-      <StepHero
-        eyebrow="Step 03"
-        title={<>How you <span className="italic">travel?</span></>}
-      />
+      <StepHero eyebrow="Étape 03" title="Comment vous venez ?" />
 
       <section>
         <SectionLabel index="03" title="Transport" />
@@ -616,10 +609,10 @@ function FormStepMode({
               <button
                 key={m.key}
                 onClick={() => setMode(m.key)}
-                className={`py-8 text-[13px] uppercase tracking-[0.15em] transition-colors ${
+                className={`py-8 text-[13px] uppercase tracking-[0.15em] transition-colors hn-regular ${
                   rightCol ? 'border-l border-black/10' : ''
                 } ${bottomRow ? 'border-t border-black/10' : ''} ${
-                  active ? 'bg-black text-white' : 'text-black/70 hover:text-black'
+                  active ? 'bg-black text-white hn-bold' : 'text-black/70 hover:text-black'
                 }`}
               >
                 {m.label}
@@ -630,7 +623,7 @@ function FormStepMode({
       </section>
 
       {error && (
-        <div className="border-l-2 border-[#D13631] pl-4 py-2 text-[13px] text-[#D13631]">
+        <div className="border-l-2 border-black pl-4 py-2 text-[13px] text-black/80">
           {error}
         </div>
       )}
@@ -693,21 +686,23 @@ function AddressInput({
   return (
     <div ref={wrapRef} className="relative">
       <div className="flex items-center gap-3 py-3">
-        <span className="font-serif italic text-[12px] text-black/40 w-7 flex-shrink-0">{prefix}</span>
+        <span className="hn-regular text-[11px] uppercase tracking-[0.14em] text-black/40 w-8 flex-shrink-0">
+          {prefix}
+        </span>
         <input
           type="text"
           value={value}
           placeholder={placeholder}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => setFocused(true)}
-          className="flex-1 bg-transparent text-[15px] text-black placeholder:text-black/30 focus:outline-none min-w-0 py-1"
+          className="flex-1 bg-transparent text-[15px] text-black placeholder:text-black/30 focus:outline-none min-w-0 py-1 hn-regular"
         />
         {value && (
           <button
             type="button"
             onClick={() => { onChange(''); setPredictions([]); }}
-            className="text-black/30 hover:text-black text-[18px] font-light px-1"
-            aria-label="Clear"
+            className="text-black/30 hover:text-black text-[18px] hn-light px-1"
+            aria-label="Effacer"
           >
             ×
           </button>
@@ -716,16 +711,16 @@ function AddressInput({
           <button
             type="button"
             onClick={onRemove}
-            className="text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-[#D13631] transition-colors"
-            aria-label="Remove"
+            className="text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-black transition-colors"
+            aria-label="Retirer"
           >
-            Remove
+            Retirer
           </button>
         )}
       </div>
 
       {focused && predictions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-black/10 z-30">
+        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-black/10 z-30 shadow-sm">
           {predictions.map((p) => (
             <button
               key={p.place_id}
@@ -735,9 +730,9 @@ function AddressInput({
                 setPredictions([]);
                 setFocused(false);
               }}
-              className="w-full text-left px-4 py-3 hover:bg-[#E8E4DB] border-b border-black/5 last:border-b-0 transition-colors"
+              className="w-full text-left px-4 py-3 hover:bg-black/[0.03] border-b border-black/5 last:border-b-0 transition-colors"
             >
-              <div className="text-[13px] text-black">{p.main}</div>
+              <div className="text-[13px] text-black hn-regular">{p.main}</div>
               {p.secondary && (
                 <div className="text-[11px] text-black/50 mt-0.5 truncate">{p.secondary}</div>
               )}
@@ -755,17 +750,19 @@ function AddressInput({
 
 function LoadingStep({ step }: { step: number }) {
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black flex flex-col px-6">
+    <div className="min-h-screen bg-white text-black flex flex-col px-6">
       <header className="pt-6 pb-4 flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Finding</span>
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">—</span>
+        <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">Recherche</span>
+        <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">—</span>
       </header>
       <hr />
 
       <main className="flex-1 flex flex-col justify-center max-w-[380px] w-full mx-auto">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Working</p>
-        <h2 className="font-serif text-[42px] leading-[1] tracking-[-0.03em] mb-12">
-          Finding your <span className="italic">spot</span>.
+        <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-5 hn-regular">
+          En cours
+        </p>
+        <h2 className="hn-light text-[44px] leading-[1.05] tracking-[-0.02em] mb-12">
+          On trouve ton spot.
         </h2>
 
         <div className="space-y-0 border-y border-black/10">
@@ -779,15 +776,15 @@ function LoadingStep({ step }: { step: number }) {
                   active ? '' : done ? 'opacity-60' : 'opacity-30'
                 }`}
               >
-                <span className="font-serif italic text-[13px] text-black/40 w-6">
+                <span className="hn-regular text-[12px] text-black/40 w-6">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className={`text-[14px] ${active ? 'text-black' : 'text-black/70'}`}>
+                <span className={`text-[14px] hn-regular ${active ? 'text-black' : 'text-black/70'}`}>
                   {label}
                 </span>
                 <span className="ml-auto">
                   {done ? (
-                    <span className="text-[11px] uppercase tracking-[0.15em] text-black/50">Done</span>
+                    <span className="text-[11px] uppercase tracking-[0.15em] text-black/50">Fait</span>
                   ) : active ? (
                     <span className="inline-block w-3 h-3 border-t border-black animate-spin rounded-full" />
                   ) : null}
@@ -829,8 +826,6 @@ function ChooseStep({
   const selected = places.find((p) => p.place_id === selectedId) || null;
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // When the selection changes (e.g. user clicks a marker on the map),
-  // scroll the matching row into view inside the list.
   useEffect(() => {
     if (!selectedId || !listContainerRef.current) return;
     const row = listContainerRef.current.querySelector<HTMLElement>(
@@ -842,16 +837,14 @@ function ChooseStep({
   }, [selectedId]);
 
   return (
-    <div className="bg-[#E8E4DB] text-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
-      <header className="flex-shrink-0 bg-[#E8E4DB]">
+    <div className="bg-white text-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
+      <header className="flex-shrink-0 bg-white">
         <div className="max-w-[520px] mx-auto px-6 py-4 flex items-center justify-between">
-          <button onClick={onBack} className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
-            ← Edit
+          <button onClick={onBack} className="text-[12px] uppercase tracking-[0.18em] text-black/50 hover:text-black transition-colors">
+            ← Modifier
           </button>
-          <h1 className="font-serif text-[16px] tracking-[-0.01em]">
-            Pick your <span className="italic">spot</span>
-          </h1>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">3 / 3</span>
+          <h1 className="hn-cond-black text-[18px] leading-none">zespot</h1>
+          <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">03 / 03</span>
         </div>
         <hr />
       </header>
@@ -872,11 +865,11 @@ function ChooseStep({
         <div className="max-w-[520px] mx-auto px-6 pt-5 pb-4">
           <div className="flex items-baseline justify-between mb-4">
             <div className="flex items-baseline gap-3">
-              <span className="font-serif italic text-[13px] text-black/40">
+              <span className="hn-regular text-[12px] text-black/40">
                 {String(places.length).padStart(2, '0')}
               </span>
-              <span className="text-[11px] uppercase tracking-[0.2em] text-black/60">
-                {spotTypeLabel(spotType)}s nearby
+              <span className="text-[11px] uppercase tracking-[0.18em] text-black/60 hn-regular">
+                {spotTypeLabel(spotType)}s à proximité
               </span>
             </div>
             <span className="text-[10px] uppercase tracking-[0.15em] text-black/40">4+ ★ = top</span>
@@ -899,16 +892,16 @@ function ChooseStep({
 
       <hr />
       <div
-        className="flex-shrink-0 px-6 py-4 bg-[#E8E4DB]"
+        className="flex-shrink-0 px-6 py-4 bg-white"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0) + 16px)' }}
       >
         <div className="max-w-[520px] mx-auto">
           <button
             onClick={() => selected && onConfirm(selected)}
             disabled={!selected}
-            className="w-full py-5 bg-[#D13631] disabled:bg-black/20 text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors disabled:cursor-not-allowed"
+            className="w-full py-5 bg-black disabled:bg-black/15 text-white text-[13px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors disabled:cursor-not-allowed"
           >
-            {selected ? <>Choose {truncate(selected.name, 22)}</> : 'Select a spot'}
+            {selected ? <>Choisir {truncate(selected.name, 22)}</> : 'Sélectionne un spot'}
           </button>
         </div>
       </div>
@@ -940,21 +933,21 @@ function SpotListRow({
       data-place-id={place.place_id}
       onClick={onClick}
       className={`w-full text-left py-4 transition-colors ${
-        selected ? 'bg-white' : 'hover:bg-black/[0.02]'
+        selected ? 'bg-black/[0.03]' : 'hover:bg-black/[0.02]'
       }`}
     >
       <div className="flex items-start gap-4">
-        <span className="font-serif italic text-[13px] text-black/40 w-6 flex-shrink-0 mt-1">
+        <span className="hn-regular text-[12px] text-black/40 w-6 flex-shrink-0 mt-1">
           {String(rank + 1).padStart(2, '0')}
         </span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline justify-between gap-2">
-            <h3 className={`font-serif text-[20px] leading-[1.15] tracking-[-0.01em] truncate ${selected ? 'text-[#D13631]' : ''}`}>
-              {selected ? <span className="italic">{place.name}</span> : place.name}
+            <h3 className={`text-[18px] leading-[1.2] tracking-[-0.01em] truncate ${selected ? 'hn-bold' : 'hn-regular'}`}>
+              {place.name}
             </h3>
             {isTop && (
-              <span className="text-[10px] uppercase tracking-[0.15em] text-[#D13631] flex-shrink-0">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-black/70 flex-shrink-0 hn-bold">
                 Top
               </span>
             )}
@@ -970,7 +963,7 @@ function SpotListRow({
 
         <span
           className={`w-3 h-3 flex-shrink-0 mt-1.5 border transition-all ${
-            selected ? 'bg-[#D13631] border-[#D13631]' : 'border-black/30'
+            selected ? 'bg-black border-black' : 'border-black/30'
           }`}
         />
       </div>
@@ -996,7 +989,7 @@ function ResultStep({
   onNew: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const [timeValue, setTimeValue] = useState<string>(''); // datetime-local
+  const [timeValue, setTimeValue] = useState<string>('');
   const [timeSaved, setTimeSaved] = useState(false);
   const [timeSaving, setTimeSaving] = useState(false);
 
@@ -1005,7 +998,6 @@ function ResultStep({
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/beta/spot/${shareCode}`
     : '';
 
-  // Save time to the share record (debounced on user confirm)
   const saveTime = async (value: string) => {
     if (!shareCode) return;
     setTimeSaving(true);
@@ -1026,9 +1018,9 @@ function ResultStep({
     if (!shareUrl) return;
     const formattedTime = timeValue ? formatDateTime(timeValue) : null;
     const shareText = formattedTime
-      ? `Let's meet at ${place.name}, ${formattedTime}. Spot found with ZeSpot.`
-      : `Let's meet at ${place.name}. Spot found with ZeSpot.`;
-    const shareData = { title: `ZeSpot — ${place.name}`, text: shareText, url: shareUrl };
+      ? `RDV à ${place.name}, ${formattedTime}. Spot trouvé avec zespot.`
+      : `RDV à ${place.name}. Spot trouvé avec zespot.`;
+    const shareData = { title: `zespot — ${place.name}`, text: shareText, url: shareUrl };
     if (typeof navigator !== 'undefined' && navigator.share) {
       try { await navigator.share(shareData); return; } catch { /* cancelled */ }
     }
@@ -1040,27 +1032,26 @@ function ResultStep({
   };
 
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black pb-20">
+    <div className="min-h-screen bg-white text-black pb-20">
       <header className="pt-6 pb-4 px-6 flex items-center justify-between max-w-[520px] mx-auto">
-        <button onClick={onHome} className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
-          ← Home
+        <button onClick={onHome} className="text-[12px] uppercase tracking-[0.18em] text-black/50 hover:text-black transition-colors">
+          ← Accueil
         </button>
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Done</span>
+        <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">Terminé</span>
       </header>
       <hr />
 
       <main className="max-w-[520px] mx-auto px-6 pt-10 space-y-12">
         <section>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-[#D13631] mb-4">
-            Your ZeSpot
+          <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-4 hn-regular">
+            Votre zespot
           </p>
-          <h1 className="font-serif text-[42px] leading-[1.02] tracking-[-0.03em]">
-            Meet at <span className="italic">{place.name}.</span>
+          <h1 className="hn-light text-[42px] leading-[1.05] tracking-[-0.02em]">
+            RDV à <span className="hn-regular">{place.name}.</span>
           </h1>
-          <p className="text-[13px] text-black/60 mt-3 leading-relaxed">{place.address}</p>
+          <p className="text-[13px] text-black/60 mt-3 leading-relaxed hn-regular">{place.address}</p>
         </section>
 
-        {/* Photo */}
         {place.photo_reference ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -1070,15 +1061,14 @@ function ResultStep({
           />
         ) : (
           <div className="w-full h-[160px] border border-black/10 flex items-center justify-center">
-            <span className="font-serif italic text-[24px] text-black/30">ZeSpot</span>
+            <span className="hn-cond-black text-[24px] text-black/30">zespot</span>
           </div>
         )}
 
-        {/* Rating */}
         {place.rating != null && (
           <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.15em] text-black/60">
             <span>★ {place.rating.toFixed(1)}</span>
-            {place.user_ratings_total != null && <span>{place.user_ratings_total} reviews</span>}
+            {place.user_ratings_total != null && <span>{place.user_ratings_total} avis</span>}
           </div>
         )}
 
@@ -1086,8 +1076,8 @@ function ResultStep({
 
         {/* Share code */}
         <section>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-black/60 mb-4">
-            01 · Share code
+          <p className="text-[11px] uppercase tracking-[0.18em] text-black/60 mb-4 hn-regular">
+            01 · Code de partage
           </p>
           {shareLoading ? (
             <div className="h-12 flex items-center">
@@ -1095,31 +1085,31 @@ function ResultStep({
             </div>
           ) : shareCode ? (
             <div className="flex items-baseline justify-between gap-4">
-              <span className="font-serif text-[44px] tracking-[0.1em] leading-none">
+              <span className="hn-bold text-[44px] tracking-[0.08em] leading-none">
                 {shareCode}
               </span>
               <button
                 onClick={handleShare}
-                className="text-[11px] uppercase tracking-[0.18em] text-[#D13631] hover:text-black transition-colors"
+                className="text-[11px] uppercase tracking-[0.18em] text-black hover:text-black/60 transition-colors hn-bold"
               >
-                {copied ? 'Copied ✓' : 'Share →'}
+                {copied ? 'Copié ✓' : 'Partager →'}
               </button>
             </div>
           ) : (
-            <p className="text-[13px] text-black/50">Code unavailable.</p>
+            <p className="text-[13px] text-black/50">Code indisponible.</p>
           )}
         </section>
 
         <hr />
 
-        {/* Time picker (optional) */}
+        {/* Time picker */}
         <section>
           <div className="flex items-baseline justify-between mb-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-black/60">
-              02 · Meeting time <span className="text-black/40 normal-case tracking-normal">(optional)</span>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-black/60 hn-regular">
+              02 · Heure du RDV <span className="text-black/40 normal-case tracking-normal">(optionnel)</span>
             </p>
-            {timeSaving && <span className="text-[10px] uppercase tracking-[0.15em] text-black/40">Saving…</span>}
-            {!timeSaving && timeSaved && <span className="text-[10px] uppercase tracking-[0.15em] text-[#D13631]">Saved ✓</span>}
+            {timeSaving && <span className="text-[10px] uppercase tracking-[0.15em] text-black/40">Enreg.</span>}
+            {!timeSaving && timeSaved && <span className="text-[10px] uppercase tracking-[0.15em] text-black">Enregistré ✓</span>}
           </div>
 
           <label className="block">
@@ -1130,26 +1120,25 @@ function ResultStep({
                 setTimeValue(e.target.value);
                 if (e.target.value) saveTime(e.target.value);
               }}
-              className="w-full bg-transparent border-0 border-b border-black/20 py-3 font-serif text-[20px] tracking-[-0.01em] text-black focus:outline-none focus:border-[#D13631] transition-colors"
-              style={{ fontFamily: 'var(--font-serif)' }}
+              className="w-full bg-transparent border-0 border-b border-black/20 py-3 text-[20px] tracking-[-0.01em] text-black focus:outline-none focus:border-black transition-colors hn-light"
             />
           </label>
           {timeValue && (
             <div className="flex items-center justify-between mt-3">
-              <p className="text-[12px] text-black/60 italic font-serif">
+              <p className="text-[12px] text-black/60 hn-regular">
                 {formatDateTime(timeValue)}
               </p>
               <button
                 onClick={() => { setTimeValue(''); saveTime(''); }}
-                className="text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-[#D13631] transition-colors"
+                className="text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-black transition-colors"
               >
-                Clear
+                Effacer
               </button>
             </div>
           )}
           {!timeValue && (
-            <p className="text-[11px] text-black/40 mt-3 italic font-serif">
-              Pick a date & time — we&apos;ll include it in the invite.
+            <p className="text-[11px] text-black/40 mt-3 hn-light">
+              Choisis une date — on l&apos;ajoute à l&apos;invitation.
             </p>
           )}
         </section>
@@ -1162,21 +1151,21 @@ function ResultStep({
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
+            className="block w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] text-center rounded-xl hn-bold active:bg-black/80 transition-colors"
           >
-            Open in Google Maps
+            Ouvrir dans Google Maps
           </a>
           <button
             onClick={onNew}
-            className="block w-full py-4 border border-black/20 text-black text-[12px] uppercase tracking-[0.18em] hover:border-black transition-colors"
+            className="block w-full py-4 border border-black rounded-xl text-black text-[12px] uppercase tracking-[0.18em] hover:bg-black hover:text-white transition-colors hn-bold"
           >
-            Create another
+            Créer un autre spot
           </button>
           <Link
             href="/beta/mes-spots"
             className="block w-full py-3 text-[11px] uppercase tracking-[0.15em] text-black/50 hover:text-black text-center transition-colors"
           >
-            All my spots →
+            Tous mes spots →
           </Link>
         </section>
       </main>
@@ -1189,7 +1178,7 @@ function ResultStep({
 // ═════════════════════════════════════════════════════════════════════
 
 function spotTypeLabel(t: SpotType): string {
-  return { bar: 'Bar', restaurant: 'Restaurant', park: 'Park', museum: 'Museum' }[t];
+  return { bar: 'Bar', restaurant: 'Restaurant', park: 'Parc', museum: 'Musée' }[t];
 }
 function geographicMid(coords: LatLng[]): LatLng {
   return {
@@ -1204,11 +1193,11 @@ function formatDateTime(value: string): string {
   try {
     const d = new Date(value);
     if (isNaN(d.getTime())) return value;
-    return d.toLocaleString('en-US', {
+    return d.toLocaleString('fr-FR', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
-      hour: 'numeric',
+      hour: '2-digit',
       minute: '2-digit',
     });
   } catch {

@@ -28,7 +28,7 @@ export default function BetaSharedSpotPage() {
         setLoading(false);
       })
       .catch(() => {
-        setError('Network error.');
+        setError('Erreur réseau.');
         setLoading(false);
       });
   }, [code]);
@@ -39,7 +39,7 @@ export default function BetaSharedSpotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E8E4DB] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <span className="inline-block w-4 h-4 border-t border-black animate-spin rounded-full" />
       </div>
     );
@@ -47,20 +47,20 @@ export default function BetaSharedSpotPage() {
 
   if (error || !place) {
     return (
-      <div className="min-h-screen bg-[#E8E4DB] flex flex-col px-6">
+      <div className="min-h-screen bg-white flex flex-col px-6">
         <header className="pt-6 pb-4 flex items-center justify-between">
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">ZeSpot</span>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">404</span>
+          <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">zespot</span>
+          <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">404</span>
         </header>
         <hr />
 
         <main className="flex-1 flex flex-col justify-center max-w-[380px] w-full mx-auto py-16">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Not found</p>
-          <h1 className="font-serif text-[42px] leading-[1.02] tracking-[-0.03em] mb-4">
-            This <span className="italic">ZeSpot</span> is gone.
+          <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-5 hn-regular">Introuvable</p>
+          <h1 className="hn-light text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
+            Ce zespot n&apos;existe plus.
           </h1>
-          <p className="font-serif text-[17px] leading-[1.4] text-black/60 mb-12">
-            The link may have expired (7 days) or the code is invalid.
+          <p className="hn-light text-[17px] leading-[1.4] text-black/60 mb-12">
+            Le lien a peut-être expiré (7 jours) ou le code est invalide.
           </p>
         </main>
 
@@ -68,9 +68,9 @@ export default function BetaSharedSpotPage() {
         <section className="py-8">
           <button
             onClick={() => router.push('/beta')}
-            className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
+            className="block w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] text-center rounded-xl hn-bold active:bg-black/80 transition-colors"
           >
-            Back home
+            Retour à l&apos;accueil
           </button>
         </section>
       </div>
@@ -80,10 +80,10 @@ export default function BetaSharedSpotPage() {
   const formattedTime = time ? formatDateTime(time) : null;
 
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black pb-16">
+    <div className="min-h-screen bg-white text-black pb-16">
       <header className="pt-6 pb-4 flex items-center justify-between max-w-[520px] mx-auto px-6">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Shared ZeSpot</span>
-        <span className="font-serif text-[13px] tracking-[0.08em] text-black/70">
+        <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">Invitation</span>
+        <span className="hn-bold text-[13px] tracking-[0.08em] text-black">
           {code?.toUpperCase()}
         </span>
       </header>
@@ -91,13 +91,13 @@ export default function BetaSharedSpotPage() {
 
       <main className="max-w-[520px] mx-auto px-6 pt-10 space-y-12">
         <section>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-[#D13631] mb-4">
-            You&apos;re invited
+          <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-4 hn-regular">
+            Tu es invité·e
           </p>
-          <h1 className="font-serif text-[44px] leading-[1.02] tracking-[-0.03em]">
-            Meet at <span className="italic">{place.name}.</span>
+          <h1 className="hn-light text-[44px] leading-[1.05] tracking-[-0.02em]">
+            RDV à <span className="hn-regular">{place.name}.</span>
           </h1>
-          <p className="text-[13px] text-black/60 mt-3 leading-relaxed">{place.address}</p>
+          <p className="text-[13px] text-black/60 mt-3 leading-relaxed hn-regular">{place.address}</p>
         </section>
 
         {place.photo_reference ? (
@@ -109,19 +109,18 @@ export default function BetaSharedSpotPage() {
           />
         ) : (
           <div className="w-full h-[180px] border border-black/10 flex items-center justify-center">
-            <span className="font-serif italic text-[26px] text-black/30">ZeSpot</span>
+            <span className="hn-cond-black text-[26px] text-black/30">zespot</span>
           </div>
         )}
 
-        {/* When — only shown if set */}
         {formattedTime && (
           <section>
             <hr className="mb-6" />
-            <p className="text-[11px] uppercase tracking-[0.2em] text-black/60 mb-3">
-              When
+            <p className="text-[11px] uppercase tracking-[0.18em] text-black/60 mb-3 hn-regular">
+              Quand
             </p>
-            <p className="font-serif text-[28px] leading-[1.15] tracking-[-0.02em]">
-              <span className="italic">{formattedTime}.</span>
+            <p className="hn-light text-[28px] leading-[1.15] tracking-[-0.01em]">
+              {formattedTime}.
             </p>
           </section>
         )}
@@ -130,12 +129,12 @@ export default function BetaSharedSpotPage() {
 
         {place.rating != null && (
           <section>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-black/60 mb-3">
-              The spot
+            <p className="text-[11px] uppercase tracking-[0.18em] text-black/60 mb-3 hn-regular">
+              Le spot
             </p>
             <div className="flex items-center gap-6 text-[11px] uppercase tracking-[0.15em] text-black/70">
               <span>★ {place.rating.toFixed(1)}</span>
-              {place.user_ratings_total != null && <span>{place.user_ratings_total} reviews</span>}
+              {place.user_ratings_total != null && <span>{place.user_ratings_total} avis</span>}
             </div>
           </section>
         )}
@@ -147,15 +146,15 @@ export default function BetaSharedSpotPage() {
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] text-center active:bg-black transition-colors"
+            className="block w-full py-5 bg-black text-white text-[13px] uppercase tracking-[0.18em] text-center rounded-xl hn-bold active:bg-black/80 transition-colors"
           >
-            Open in Google Maps
+            Ouvrir dans Google Maps
           </a>
           <Link
             href="/beta/find"
-            className="block w-full py-4 border border-black/20 text-black text-[12px] uppercase tracking-[0.18em] text-center hover:border-black transition-colors"
+            className="block w-full py-4 border border-black rounded-xl text-black text-[12px] uppercase tracking-[0.18em] text-center hover:bg-black hover:text-white transition-colors hn-bold"
           >
-            Create my own ZeSpot
+            Créer mon propre zespot
           </Link>
         </section>
       </main>
@@ -167,11 +166,11 @@ function formatDateTime(value: string): string {
   try {
     const d = new Date(value);
     if (isNaN(d.getTime())) return value;
-    return d.toLocaleString('en-US', {
+    return d.toLocaleString('fr-FR', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
-      hour: 'numeric',
+      hour: '2-digit',
       minute: '2-digit',
     });
   } catch {

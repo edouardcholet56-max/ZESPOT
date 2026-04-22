@@ -18,8 +18,8 @@ interface BetaSpot {
 const TYPE_LABEL: Record<BetaSpot['type'], string> = {
   bar: 'Bar',
   restaurant: 'Restaurant',
-  park: 'Park',
-  museum: 'Museum',
+  park: 'Parc',
+  museum: 'Musée',
 };
 
 export default function BetaMesSpotsPage() {
@@ -32,22 +32,20 @@ export default function BetaMesSpotsPage() {
   }, []);
 
   const remove = (code: string) => {
-    if (!confirm('Remove this spot from your list?')) return;
+    if (!confirm('Retirer ce spot de ta liste ?')) return;
     storage.removeBetaSpot(code);
     setSpots((prev) => prev.filter((s) => s.code !== code));
   };
 
   return (
-    <div className="min-h-screen bg-[#E8E4DB] text-black">
-      <header className="sticky top-0 z-20 bg-[#E8E4DB]">
+    <div className="min-h-screen bg-white text-black">
+      <header className="sticky top-0 z-20 bg-white">
         <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
-          <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
-            ← Back
+          <Link href="/beta" className="text-[12px] uppercase tracking-[0.18em] text-black/50 hover:text-black transition-colors">
+            ← Retour
           </Link>
-          <h1 className="font-serif text-[18px] tracking-[-0.01em]">
-            My <span className="italic">spots</span>
-          </h1>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+          <h1 className="hn-cond-black text-[20px] leading-none">zespot</h1>
+          <span className="text-[12px] uppercase tracking-[0.18em] text-black/50">
             {loaded ? spots.length : '—'}
           </span>
         </div>
@@ -61,18 +59,18 @@ export default function BetaMesSpotsPage() {
           </div>
         ) : spots.length === 0 ? (
           <div className="py-12">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-5">Empty</p>
-            <h2 className="font-serif text-[40px] leading-[1] tracking-[-0.03em] mb-5">
-              No spot <span className="italic">yet.</span>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-black/40 mb-5 hn-regular">Vide</p>
+            <h2 className="hn-light text-[40px] leading-[1.05] tracking-[-0.02em] mb-5">
+              Aucun spot pour le moment.
             </h2>
-            <p className="font-serif text-[17px] leading-[1.4] text-black/60 mb-10 max-w-[320px]">
-              Drop a mood — create your first ZeSpot to meet friends <span className="italic">at equal travel time.</span>
+            <p className="hn-light text-[17px] leading-[1.4] text-black/60 mb-10 max-w-[320px]">
+              Crée ton premier zespot pour retrouver tes amis à équi-temps.
             </p>
             <Link
               href="/beta/find"
-              className="inline-block py-4 px-8 bg-[#D13631] text-white text-[12px] uppercase tracking-[0.18em] active:bg-black transition-colors"
+              className="inline-block py-4 px-8 bg-black text-white text-[12px] uppercase tracking-[0.18em] rounded-xl hn-bold active:bg-black/80 transition-colors"
             >
-              Find our spot
+              Créez un spot
             </Link>
           </div>
         ) : (
@@ -103,19 +101,19 @@ function SpotRow({ spot, onRemove }: { spot: BetaSpot; onRemove: () => void }) {
             />
           ) : (
             <div className="w-16 h-16 border border-black/10 flex items-center justify-center flex-shrink-0">
-              <span className="font-serif italic text-[12px] text-black/30">Ze</span>
+              <span className="hn-cond-black text-[13px] text-black/30">ze</span>
             </div>
           )}
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-black/50 mb-1">
+            <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.15em] text-black/50 mb-1">
               <span>{label}</span>
               {spot.rating != null && <span>★ {spot.rating.toFixed(1)}</span>}
-              <span className="font-serif italic text-black/70 normal-case tracking-[0.08em]">
+              <span className="hn-bold text-black/70 tracking-[0.08em]">
                 {spot.code}
               </span>
             </div>
-            <h3 className="font-serif text-[22px] leading-[1.15] tracking-[-0.01em] truncate">
+            <h3 className="hn-regular text-[20px] leading-[1.2] tracking-[-0.01em] truncate">
               {spot.name}
             </h3>
             {spot.address && (
@@ -127,9 +125,9 @@ function SpotRow({ spot, onRemove }: { spot: BetaSpot; onRemove: () => void }) {
 
       <button
         onClick={onRemove}
-        className="mt-3 ml-20 text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-[#D13631] transition-colors"
+        className="mt-3 ml-20 text-[10px] uppercase tracking-[0.15em] text-black/40 hover:text-black transition-colors"
       >
-        Remove
+        Retirer
       </button>
     </div>
   );
