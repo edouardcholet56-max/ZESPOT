@@ -65,13 +65,12 @@ body {
 .beta-root .hn-bold    { font-weight: 700; }
 .beta-root .hn-black   { font-weight: 900; }
 
-/* Condensed Black — used for the wordmark. */
+/* Wordmark — Helvetica Neue Bold, standard proportions. */
 .beta-root .hn-cond-black {
-  font-family: "HelveticaNeue-CondensedBlack", "Helvetica Neue Condensed",
-               "Helvetica Neue", "Arial Narrow", Helvetica, Arial, sans-serif;
-  font-weight: 900;
-  font-stretch: 75%;
-  letter-spacing: -0.03em;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-stretch: 100%;
+  letter-spacing: -0.04em;
 }
 
 /* Neutralise the old serif class — beta is all Helvetica Neue now. */
