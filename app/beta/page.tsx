@@ -22,14 +22,14 @@ export default function BetaHomePage() {
       <hr />
 
       {/* Hero */}
-      <main className="flex-1 flex flex-col justify-center py-12">
+      <main className="flex-1 flex flex-col items-center justify-center py-12 text-center">
         <p className="text-[12px] uppercase tracking-[0.25em] text-black/50 mb-6">
           Meet better.
         </p>
         <h1 className="font-serif text-[84px] leading-[0.95] tracking-[-0.04em] mb-8">
           <span className="italic">Ze</span>Spot
         </h1>
-        <p className="font-serif text-[22px] leading-[1.3] text-black/75 max-w-[320px]">
+        <p className="font-serif text-[22px] leading-[1.3] text-black/75 max-w-[320px] mx-auto">
           The perfect place to meet your friends, <span className="italic">at equal travel time.</span>
         </p>
       </main>

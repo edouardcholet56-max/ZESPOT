@@ -680,6 +680,19 @@ function ChooseStep({
   mode: TransportMode;
 }) {
   const selected = places.find((p) => p.place_id === selectedId) || null;
+  const listContainerRef = useRef<HTMLDivElement>(null);
+
+  // When the selection changes (e.g. user clicks a marker on the map),
+  // scroll the matching row into view inside the list.
+  useEffect(() => {
+    if (!selectedId || !listContainerRef.current) return;
+    const row = listContainerRef.current.querySelector<HTMLElement>(
+      `[data-place-id="${CSS.escape(selectedId)}"]`
+    );
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedId]);
 
   return (
     <div className="bg-[#F5F2EE] text-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
@@ -708,7 +721,7 @@ function ChooseStep({
 
       <hr />
 
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+      <div ref={listContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
         <div className="max-w-[520px] mx-auto px-6 pt-5 pb-4">
           <div className="flex items-baseline justify-between mb-4">
             <div className="flex items-baseline gap-3">
@@ -777,6 +790,7 @@ function SpotListRow({
   return (
     <button
       type="button"
+      data-place-id={place.place_id}
       onClick={onClick}
       className={`w-full text-left py-4 transition-colors ${
         selected ? 'bg-white' : 'hover:bg-black/[0.02]'
