@@ -23,10 +23,10 @@ export default function BetaHomePage() {
 
       {/* Wordmark + tagline — centered vertically */}
       <main className="flex-1 flex flex-col items-center justify-center text-center">
-        <h1 className="hn-cond-black text-[88px] leading-[0.9] text-black">
+        <h1 className="hn-cond-black text-[56px] leading-[0.9] text-black">
           zespot
         </h1>
-        <p className="hn-light text-[15px] tracking-[-0.01em] text-black/55 mt-3">
+        <p className="hn-light text-[14px] tracking-[-0.01em] text-black/55 mt-3">
           simplifiez vos sorties.
         </p>
       </main>
