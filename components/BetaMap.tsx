@@ -69,7 +69,7 @@ export default function BetaMap({
           className: '',
           html: `<div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
             <div style="width:10px;height:10px;background:#000;"></div>
-            <div style="font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:11px;color:#000;background:rgba(245,242,238,0.95);padding:1px 6px;border:1px solid rgba(0,0,0,0.12);">${label}</div>
+            <div style="font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:11px;color:#000;background:rgba(232,228,219,0.95);padding:1px 6px;border:1px solid rgba(0,0,0,0.12);">${label}</div>
           </div>`,
           iconSize: [60, 12],
           iconAnchor: [5, 6],
@@ -166,7 +166,7 @@ function buildSpotIcon(L: any, p: Place, isSelected: boolean) {
   const color = isSelected ? '#D13631' : '#000';
 
   const label = isSelected
-    ? `<div style="position:absolute;top:${dotSize + 4}px;left:50%;transform:translateX(-50%);font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:12px;color:#000;background:rgba(245,242,238,0.95);padding:2px 7px;border:1px solid rgba(0,0,0,0.12);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${
+    ? `<div style="position:absolute;top:${dotSize + 4}px;left:50%;transform:translateX(-50%);font-family:var(--font-serif),Georgia,serif;font-style:italic;font-size:12px;color:#000;background:rgba(232,228,219,0.95);padding:2px 7px;border:1px solid rgba(0,0,0,0.12);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${
         p.name.length > 18 ? p.name.slice(0, 16) + '…' : p.name
       }</div>`
     : '';

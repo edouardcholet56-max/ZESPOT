@@ -8,7 +8,7 @@ import Link from 'next/link';
  */
 export default function BetaHomePage() {
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black flex flex-col px-6">
+    <div className="min-h-screen bg-[#E8E4DB] text-black flex flex-col px-6">
       {/* Top bar */}
       <header className="pt-6 pb-4 flex items-center justify-between">
         <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">

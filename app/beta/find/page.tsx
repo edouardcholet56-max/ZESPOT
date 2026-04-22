@@ -10,7 +10,7 @@ import { haversine, uid, sleep } from '@/lib/utils';
 
 const BetaMap = dynamic(() => import('@/components/BetaMap'), { ssr: false });
 
-type Step = 'geoloc' | 'form' | 'loading' | 'choose' | 'result';
+type Step = 'geoloc' | 'form-1' | 'form-2' | 'form-3' | 'loading' | 'choose' | 'result';
 type SpotType = 'bar' | 'restaurant' | 'park' | 'museum';
 
 const MAX_ADDRESSES = 6;
@@ -67,7 +67,7 @@ export default function BetaFindPage() {
         updated[0] = { ...updated[0], value: saved, label: 'Me' };
         return updated;
       });
-      setStep('form');
+      setStep('form-1');
     }
     const lastMode = storage.lastMode as TransportMode;
     if (lastMode === 'walking' || lastMode === 'bicycling' || lastMode === 'transit' || lastMode === 'driving') {
@@ -78,7 +78,7 @@ export default function BetaFindPage() {
   // ── Geoloc ──────────────────────────────────────────────────────────
   const requestGeolocation = () => {
     if (!navigator.geolocation) {
-      setStep('form');
+      setStep('form-1');
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -97,9 +97,9 @@ export default function BetaFindPage() {
             });
           }
         } catch { /* silent */ }
-        finally { setStep('form'); }
+        finally { setStep('form-1'); }
       },
-      () => setStep('form'),
+      () => setStep('form-1'),
       { timeout: 8000 }
     );
   };
@@ -197,7 +197,7 @@ export default function BetaFindPage() {
       setStep('choose');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
-      setStep('form');
+      setStep('form-1');
     }
   };
 
@@ -229,7 +229,7 @@ export default function BetaFindPage() {
     finally { setShareLoading(false); }
   };
 
-  if (step === 'geoloc') return <GeolocStep onAccept={requestGeolocation} onSkip={() => setStep('form')} />;
+  if (step === 'geoloc') return <GeolocStep onAccept={requestGeolocation} onSkip={() => setStep('form-1')} />;
   if (step === 'loading') return <LoadingStep step={loadingStep} />;
   if (step === 'choose' && midpoint) {
     return (
@@ -241,7 +241,7 @@ export default function BetaFindPage() {
         setSelectedId={setSelectedId}
         spotType={spotType}
         onConfirm={confirmSpot}
-        onBack={() => setStep('form')}
+        onBack={() => setStep('form-1')}
         mode={mode}
       />
     );
@@ -259,24 +259,48 @@ export default function BetaFindPage() {
           setCandidates([]);
           setCoords([]);
           setMidpoint(null);
-          setStep('form');
+          setStep('form-1');
         }}
       />
     );
   }
 
+  if (step === 'form-2') {
+    return (
+      <FormStepType
+        spotType={spotType}
+        setSpotType={setSpotType}
+        onBack={() => setStep('form-1')}
+        onNext={() => setStep('form-3')}
+      />
+    );
+  }
+
+  if (step === 'form-3') {
+    return (
+      <FormStepMode
+        mode={mode}
+        setMode={setMode}
+        error={error}
+        onBack={() => setStep('form-2')}
+        onSubmit={findSpot}
+      />
+    );
+  }
+
   return (
-    <FormStep
+    <FormStepAddresses
       addresses={addresses}
       updateAddress={updateAddress}
       addAddress={addAddress}
       removeAddress={removeAddress}
-      spotType={spotType}
-      setSpotType={setSpotType}
-      mode={mode}
-      setMode={setMode}
       error={error}
-      onSubmit={findSpot}
+      onBack={() => router.push('/beta')}
+      onNext={() => {
+        const filled = addresses.filter((a) => a.value.trim().length > 0);
+        if (filled.length < 2) return;
+        setStep('form-2');
+      }}
     />
   );
 }
@@ -287,7 +311,7 @@ export default function BetaFindPage() {
 
 function GeolocStep({ onAccept, onSkip }: { onAccept: () => void; onSkip: () => void }) {
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black flex flex-col px-6">
+    <div className="min-h-screen bg-[#E8E4DB] text-black flex flex-col px-6">
       <header className="pt-6 pb-4 flex items-center justify-between">
         <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
           ← Back
@@ -328,154 +352,63 @@ function GeolocStep({ onAccept, onSkip }: { onAccept: () => void; onSkip: () => 
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// FORM STEP
+// STEP SHELL — reusable chrome for the three form pages
 // ═════════════════════════════════════════════════════════════════════
 
-function FormStep({
-  addresses,
-  updateAddress,
-  addAddress,
-  removeAddress,
-  spotType,
-  setSpotType,
-  mode,
-  setMode,
-  error,
-  onSubmit,
+function StepShell({
+  stepNumber,
+  onBack,
+  children,
+  cta,
 }: {
-  addresses: AddressItem[];
-  updateAddress: (id: string, value: string) => void;
-  addAddress: () => void;
-  removeAddress: (id: string) => void;
-  spotType: SpotType;
-  setSpotType: (t: SpotType) => void;
-  mode: TransportMode;
-  setMode: (m: TransportMode) => void;
-  error: string;
-  onSubmit: () => void;
+  stepNumber: number;
+  onBack: () => void;
+  children: React.ReactNode;
+  cta: React.ReactNode;
 }) {
-  const canAdd = addresses.length < MAX_ADDRESSES;
-
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black pb-28">
-      <header className="sticky top-0 z-20 bg-[#F5F2EE]">
+    <div className="min-h-screen bg-[#E8E4DB] text-black pb-28 flex flex-col">
+      <header className="sticky top-0 z-20 bg-[#E8E4DB]">
         <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
-          <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
+          <button
+            onClick={onBack}
+            className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors"
+          >
             ← Back
-          </Link>
+          </button>
           <h1 className="font-serif text-[18px] tracking-[-0.01em]">
             <span className="italic">Ze</span>Spot
           </h1>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">2 / 3</span>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">
+            {String(stepNumber).padStart(2, '0')} / 03
+          </span>
         </div>
         <hr />
       </header>
 
-      <main className="max-w-[520px] mx-auto px-6 pt-10 space-y-14">
-        {/* Hero title */}
-        <section>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-4">Your meetup</p>
-          <h2 className="font-serif text-[44px] leading-[1] tracking-[-0.03em]">
-            Who&apos;s <span className="italic">coming?</span>
-          </h2>
-        </section>
-
-        {/* Addresses */}
-        <section>
-          <SectionLabel index="01" title="Addresses" meta={`${addresses.length} / ${MAX_ADDRESSES}`} />
-          <div className="divide-y divide-black/10 border-y border-black/10">
-            {addresses.map((addr, i) => (
-              <AddressInput
-                key={addr.id}
-                value={addr.value}
-                placeholder={i === 0 ? 'Your address' : `Friend ${i}`}
-                prefix={i === 0 ? 'You' : `F${i}`}
-                removable={i >= MIN_ADDRESSES}
-                onChange={(v) => updateAddress(addr.id, v)}
-                onRemove={() => removeAddress(addr.id)}
-              />
-            ))}
-          </div>
-          {canAdd && (
-            <button
-              type="button"
-              onClick={addAddress}
-              className="mt-4 text-[11px] uppercase tracking-[0.18em] text-black/60 hover:text-[#D13631] transition-colors"
-            >
-              + Add address
-            </button>
-          )}
-        </section>
-
-        {/* Spot type */}
-        <section>
-          <SectionLabel index="02" title="Where to" />
-          <div className="border-y border-black/10 divide-y divide-black/10">
-            {SPOT_TYPES.map((t) => {
-              const active = spotType === t.key;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => setSpotType(t.key)}
-                  className="w-full flex items-center justify-between py-4 text-left transition-colors hover:bg-black/[0.02]"
-                >
-                  <span
-                    className={`font-serif text-[22px] tracking-[-0.01em] ${active ? 'text-[#D13631]' : 'text-black'}`}
-                  >
-                    {active ? <span className="italic">{t.label}</span> : t.label}
-                  </span>
-                  <span
-                    className={`w-3 h-3 border transition-all ${
-                      active ? 'bg-[#D13631] border-[#D13631]' : 'border-black/30'
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Mode */}
-        <section>
-          <SectionLabel index="03" title="How you travel" />
-          <div className="grid grid-cols-4 border-y border-black/10">
-            {MODES.map((m, i) => {
-              const active = mode === m.key;
-              return (
-                <button
-                  key={m.key}
-                  onClick={() => setMode(m.key)}
-                  className={`py-5 text-[11px] uppercase tracking-[0.15em] transition-colors ${
-                    i > 0 ? 'border-l border-black/10' : ''
-                  } ${active ? 'bg-black text-white' : 'text-black/70 hover:text-black'}`}
-                >
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {error && (
-          <div className="border-l-2 border-[#D13631] pl-4 py-2 text-[13px] text-[#D13631]">
-            {error}
-          </div>
-        )}
+      <main className="flex-1 max-w-[520px] mx-auto w-full px-6 pt-10 pb-8 space-y-12">
+        {children}
       </main>
 
-      {/* CTA */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-[#F5F2EE] z-30">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#E8E4DB]">
         <hr />
-        <div className="px-6 py-5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0) + 20px)' }}>
-          <button
-            onClick={onSubmit}
-            className="w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors"
-          >
-            Find our spot
-          </button>
+        <div
+          className="max-w-[520px] mx-auto px-6 py-5"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0) + 20px)' }}
+        >
+          {cta}
         </div>
       </div>
     </div>
+  );
+}
+
+function StepHero({ eyebrow, title }: { eyebrow: string; title: React.ReactNode }) {
+  return (
+    <section>
+      <p className="text-[11px] uppercase tracking-[0.25em] text-black/50 mb-4">{eyebrow}</p>
+      <h2 className="font-serif text-[44px] leading-[1] tracking-[-0.03em]">{title}</h2>
+    </section>
   );
 }
 
@@ -488,6 +421,220 @@ function SectionLabel({ index, title, meta }: { index: string; title: string; me
       </div>
       {meta && <span className="text-[11px] uppercase tracking-[0.15em] text-black/40">{meta}</span>}
     </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// FORM STEP 1 — ADDRESSES  (Who's coming)
+// ═════════════════════════════════════════════════════════════════════
+
+function FormStepAddresses({
+  addresses,
+  updateAddress,
+  addAddress,
+  removeAddress,
+  error,
+  onBack,
+  onNext,
+}: {
+  addresses: AddressItem[];
+  updateAddress: (id: string, value: string) => void;
+  addAddress: () => void;
+  removeAddress: (id: string) => void;
+  error: string;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const canAdd = addresses.length < MAX_ADDRESSES;
+  const filledCount = addresses.filter((a) => a.value.trim().length > 0).length;
+  const canAdvance = filledCount >= MIN_ADDRESSES;
+
+  return (
+    <StepShell
+      stepNumber={1}
+      onBack={onBack}
+      cta={
+        <button
+          onClick={onNext}
+          disabled={!canAdvance}
+          className="w-full py-5 bg-[#D13631] disabled:bg-black/20 text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors disabled:cursor-not-allowed"
+        >
+          {canAdvance ? 'Next →' : `Add ${MIN_ADDRESSES - filledCount} more`}
+        </button>
+      }
+    >
+      <StepHero
+        eyebrow="Step 01"
+        title={<>Who&apos;s <span className="italic">coming?</span></>}
+      />
+
+      <section>
+        <SectionLabel
+          index="01"
+          title="Addresses"
+          meta={`${addresses.length} / ${MAX_ADDRESSES}`}
+        />
+        <div className="divide-y divide-black/10 border-y border-black/10">
+          {addresses.map((addr, i) => (
+            <AddressInput
+              key={addr.id}
+              value={addr.value}
+              placeholder={i === 0 ? 'Your address' : `Friend ${i}`}
+              prefix={i === 0 ? 'You' : `F${i}`}
+              removable={i >= MIN_ADDRESSES}
+              onChange={(v) => updateAddress(addr.id, v)}
+              onRemove={() => removeAddress(addr.id)}
+            />
+          ))}
+        </div>
+        {canAdd && (
+          <button
+            type="button"
+            onClick={addAddress}
+            className="mt-4 text-[11px] uppercase tracking-[0.18em] text-black/60 hover:text-[#D13631] transition-colors"
+          >
+            + Add address
+          </button>
+        )}
+      </section>
+
+      {error && (
+        <div className="border-l-2 border-[#D13631] pl-4 py-2 text-[13px] text-[#D13631]">
+          {error}
+        </div>
+      )}
+    </StepShell>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// FORM STEP 2 — SPOT TYPE  (Where to?)
+// ═════════════════════════════════════════════════════════════════════
+
+function FormStepType({
+  spotType,
+  setSpotType,
+  onBack,
+  onNext,
+}: {
+  spotType: SpotType;
+  setSpotType: (t: SpotType) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <StepShell
+      stepNumber={2}
+      onBack={onBack}
+      cta={
+        <button
+          onClick={onNext}
+          className="w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors"
+        >
+          Next →
+        </button>
+      }
+    >
+      <StepHero
+        eyebrow="Step 02"
+        title={<>Where <span className="italic">to?</span></>}
+      />
+
+      <section>
+        <SectionLabel index="02" title="Pick a vibe" />
+        <div className="border-y border-black/10 divide-y divide-black/10">
+          {SPOT_TYPES.map((t) => {
+            const active = spotType === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setSpotType(t.key)}
+                className="w-full flex items-center justify-between py-4 text-left transition-colors hover:bg-black/[0.02]"
+              >
+                <span
+                  className={`font-serif text-[22px] tracking-[-0.01em] ${active ? 'text-[#D13631]' : 'text-black'}`}
+                >
+                  {active ? <span className="italic">{t.label}</span> : t.label}
+                </span>
+                <span
+                  className={`w-3 h-3 border transition-all ${
+                    active ? 'bg-[#D13631] border-[#D13631]' : 'border-black/30'
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    </StepShell>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// FORM STEP 3 — MODE  (How you travel?)
+// ═════════════════════════════════════════════════════════════════════
+
+function FormStepMode({
+  mode,
+  setMode,
+  error,
+  onBack,
+  onSubmit,
+}: {
+  mode: TransportMode;
+  setMode: (m: TransportMode) => void;
+  error: string;
+  onBack: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <StepShell
+      stepNumber={3}
+      onBack={onBack}
+      cta={
+        <button
+          onClick={onSubmit}
+          className="w-full py-5 bg-[#D13631] text-white text-[13px] uppercase tracking-[0.18em] active:bg-black transition-colors"
+        >
+          Find our spot
+        </button>
+      }
+    >
+      <StepHero
+        eyebrow="Step 03"
+        title={<>How you <span className="italic">travel?</span></>}
+      />
+
+      <section>
+        <SectionLabel index="03" title="Transport" />
+        <div className="grid grid-cols-2 border-y border-black/10">
+          {MODES.map((m, i) => {
+            const active = mode === m.key;
+            const rightCol = i % 2 === 1;
+            const bottomRow = i >= 2;
+            return (
+              <button
+                key={m.key}
+                onClick={() => setMode(m.key)}
+                className={`py-8 text-[13px] uppercase tracking-[0.15em] transition-colors ${
+                  rightCol ? 'border-l border-black/10' : ''
+                } ${bottomRow ? 'border-t border-black/10' : ''} ${
+                  active ? 'bg-black text-white' : 'text-black/70 hover:text-black'
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {error && (
+        <div className="border-l-2 border-[#D13631] pl-4 py-2 text-[13px] text-[#D13631]">
+          {error}
+        </div>
+      )}
+    </StepShell>
   );
 }
 
@@ -588,7 +735,7 @@ function AddressInput({
                 setPredictions([]);
                 setFocused(false);
               }}
-              className="w-full text-left px-4 py-3 hover:bg-[#F5F2EE] border-b border-black/5 last:border-b-0 transition-colors"
+              className="w-full text-left px-4 py-3 hover:bg-[#E8E4DB] border-b border-black/5 last:border-b-0 transition-colors"
             >
               <div className="text-[13px] text-black">{p.main}</div>
               {p.secondary && (
@@ -608,7 +755,7 @@ function AddressInput({
 
 function LoadingStep({ step }: { step: number }) {
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black flex flex-col px-6">
+    <div className="min-h-screen bg-[#E8E4DB] text-black flex flex-col px-6">
       <header className="pt-6 pb-4 flex items-center justify-between">
         <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Finding</span>
         <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">—</span>
@@ -695,8 +842,8 @@ function ChooseStep({
   }, [selectedId]);
 
   return (
-    <div className="bg-[#F5F2EE] text-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
-      <header className="flex-shrink-0 bg-[#F5F2EE]">
+    <div className="bg-[#E8E4DB] text-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
+      <header className="flex-shrink-0 bg-[#E8E4DB]">
         <div className="max-w-[520px] mx-auto px-6 py-4 flex items-center justify-between">
           <button onClick={onBack} className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
             ← Edit
@@ -752,7 +899,7 @@ function ChooseStep({
 
       <hr />
       <div
-        className="flex-shrink-0 px-6 py-4 bg-[#F5F2EE]"
+        className="flex-shrink-0 px-6 py-4 bg-[#E8E4DB]"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0) + 16px)' }}
       >
         <div className="max-w-[520px] mx-auto">
@@ -893,7 +1040,7 @@ function ResultStep({
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black pb-20">
+    <div className="min-h-screen bg-[#E8E4DB] text-black pb-20">
       <header className="pt-6 pb-4 px-6 flex items-center justify-between max-w-[520px] mx-auto">
         <button onClick={onHome} className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
           ← Home

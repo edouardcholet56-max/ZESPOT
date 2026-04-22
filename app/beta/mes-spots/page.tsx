@@ -38,8 +38,8 @@ export default function BetaMesSpotsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black">
-      <header className="sticky top-0 z-20 bg-[#F5F2EE]">
+    <div className="min-h-screen bg-[#E8E4DB] text-black">
+      <header className="sticky top-0 z-20 bg-[#E8E4DB]">
         <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
           <Link href="/beta" className="text-[11px] uppercase tracking-[0.2em] text-black/50 hover:text-black transition-colors">
             ← Back

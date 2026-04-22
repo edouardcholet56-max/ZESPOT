@@ -66,6 +66,20 @@ body {
   margin: 0;
 }
 
+/* Display headings + captions use the brand red.
+   Captions are any uppercase letter-spaced eyebrow/meta text.
+   Excluded: CTAs (text-white / bg-) and disabled states. */
+.beta-root h1,
+.beta-root h2 {
+  color: #D13631;
+}
+.beta-root [class*="uppercase"][class*="tracking-["]:not([class*="text-white"]):not([class*="bg-[#D13631]"]):not([class*="bg-black"]):not([class*="disabled:"]) {
+  color: #D13631;
+}
+.beta-root .caption {
+  color: #D13631;
+}
+
 /* Leaflet light overrides for beta */
 .beta-root .leaflet-popup-content-wrapper {
   background: #fff !important;
@@ -81,7 +95,7 @@ body {
   color: #000 !important;
 }
 .beta-root .leaflet-control-attribution {
-  background: rgba(245,242,238,0.85) !important;
+  background: rgba(232,228,219,0.85) !important;
   color: #000 !important;
 }
 .beta-root .leaflet-control-attribution a { color: #000 !important; }

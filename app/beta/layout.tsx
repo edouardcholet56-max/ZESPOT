@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function BetaLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`${instrumentSerif.variable} ${geist.variable} ${geist.className} beta-root bg-[#F5F2EE] text-black min-h-screen`}
+      className={`${instrumentSerif.variable} ${geist.variable} ${geist.className} beta-root bg-[#E8E4DB] text-black min-h-screen`}
     >
       {children}
     </div>

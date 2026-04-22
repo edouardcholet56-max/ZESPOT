@@ -39,7 +39,7 @@ export default function BetaSharedSpotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F2EE] flex items-center justify-center">
+      <div className="min-h-screen bg-[#E8E4DB] flex items-center justify-center">
         <span className="inline-block w-4 h-4 border-t border-black animate-spin rounded-full" />
       </div>
     );
@@ -47,7 +47,7 @@ export default function BetaSharedSpotPage() {
 
   if (error || !place) {
     return (
-      <div className="min-h-screen bg-[#F5F2EE] flex flex-col px-6">
+      <div className="min-h-screen bg-[#E8E4DB] flex flex-col px-6">
         <header className="pt-6 pb-4 flex items-center justify-between">
           <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">ZeSpot</span>
           <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">404</span>
@@ -80,7 +80,7 @@ export default function BetaSharedSpotPage() {
   const formattedTime = time ? formatDateTime(time) : null;
 
   return (
-    <div className="min-h-screen bg-[#F5F2EE] text-black pb-16">
+    <div className="min-h-screen bg-[#E8E4DB] text-black pb-16">
       <header className="pt-6 pb-4 flex items-center justify-between max-w-[520px] mx-auto px-6">
         <span className="text-[11px] uppercase tracking-[0.2em] text-black/50">Shared ZeSpot</span>
         <span className="font-serif text-[13px] tracking-[0.08em] text-black/70">
