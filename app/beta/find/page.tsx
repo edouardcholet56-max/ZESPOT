@@ -368,9 +368,14 @@ function StepShell({
   children: React.ReactNode;
   cta: React.ReactNode;
 }) {
+  // Fixed-viewport layout — header, scrollable middle, footer CTA never shift
+  // between steps regardless of content height.
   return (
-    <div className="min-h-screen bg-white text-black pb-28 flex flex-col">
-      <header className="sticky top-0 z-20 bg-white">
+    <div
+      className="bg-white text-black flex flex-col overflow-hidden"
+      style={{ height: '100dvh' }}
+    >
+      <header className="flex-shrink-0 bg-white">
         <div className="max-w-[520px] mx-auto px-6 pt-6 pb-4 flex items-center justify-between">
           <button
             onClick={onBack}
@@ -386,11 +391,13 @@ function StepShell({
         <hr />
       </header>
 
-      <main className="flex-1 max-w-[520px] mx-auto w-full px-6 pt-10 pb-8 space-y-12">
-        {children}
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="max-w-[520px] mx-auto w-full px-6 pt-10 pb-8 space-y-12">
+          {children}
+        </div>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white">
+      <div className="flex-shrink-0 bg-white">
         <hr />
         <div
           className="max-w-[520px] mx-auto px-6 py-5"
